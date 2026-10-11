@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Газель с грузчиками — расчёт стоимости онлайн</title>
-  <meta name="description" content="Грузоперевозки на Газели: тариф за час, минимальный заказ, расчёт стоимости переезда и заявка в Telegram или MAX за минуту.">
+  <title>Грузоперевозки на Газели — расчёт стоимости</title>
+  <meta name="description" content="Грузоперевозки на Газели: тариф за час, минимальный заказ, расчёт стоимости и заявка в Telegram или MAX.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Газель с грузчиками — расчёт стоимости онлайн">
+  <meta property="og:title" content="Грузоперевозки на Газели — расчёт стоимости">
   <meta property="og:description" content="Тариф за час, минимальный заказ и заявка без звонков.">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f4f3ef" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#121314" media="(prefers-color-scheme: dark)">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23c2410c'/%3E%3Cpath d='M10 20h26v20H10zM36 27h10l8 8v5H36z' fill='white'/%3E%3Ccircle cx='20' cy='43' r='5' fill='%23c2410c' stroke='white' stroke-width='3'/%3E%3Ccircle cx='46' cy='43' r='5' fill='%23c2410c' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f0f10" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%23ffd000'/%3E%3Cpath d='M9 19h28v21H9zM37 26h10l8 8v6H37z' fill='%23111214'/%3E%3Ccircle cx='20' cy='44' r='5' fill='%23111214'/%3E%3Ccircle cx='46' cy='44' r='5' fill='%23111214'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@600;700;800&family=Fira+Sans:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="styles.css">
   <script>document.documentElement.classList.replace("no-js", "js");</script>
 </head>
@@ -23,10 +23,7 @@
 
   <header class="top">
     <div class="wrap top__in">
-      <a class="brand" href="#top" aria-label="В начало страницы">
-        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7"/><path d="M5 10h13v10H5zM18 13.5h5l4 4V20h-9z" fill="#fff"/><circle cx="10" cy="21.5" r="2.6" fill="#fff"/><circle cx="23" cy="21.5" r="2.6" fill="#fff"/></svg>
-        <span class="brand__name" data-bind="name"></span>
-      </a>
+      <a class="brand" href="#top" data-bind="name"></a>
       <a class="top__call" data-tel hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg>
         <span class="top__num" data-bind="phone"></span>
@@ -35,36 +32,59 @@
   </header>
 
   <main id="top">
-    <section class="hero">
-      <div class="wrap hero__grid">
-        <div class="hero__main" data-reveal>
-          <p class="eyebrow" data-bind="cityLine"></p>
+    <section class="hero hero--nophoto" id="hero">
+      <div class="hero__in">
+        <figure class="hero__media" id="heroMedia" hidden>
+          <img id="heroImg" alt="Фото машины" decoding="async" fetchpriority="high">
+        </figure>
+        <div class="hero__body" data-reveal>
           <h1 class="hero__title" id="heroTitle"></h1>
-          <p class="hero__price"><span>от</span> <strong id="heroPrice"></strong> <span>/ час</span></p>
           <p class="hero__sub" data-bind="tagline"></p>
-          <ul class="trust" id="trust"></ul>
+
+          <div class="price">
+            <p class="price__main"><strong id="heroPrice"></strong><span>/ час</span></p>
+            <p class="price__min" id="heroMin"></p>
+          </div>
+
+          <dl class="facts" id="facts"></dl>
+          <p class="areas" id="areas" hidden></p>
+          <a class="rating" id="rating" hidden></a>
+
           <div class="hero__cta">
-            <a href="#order" class="btn btn--primary btn--lg" data-scroll>Рассчитать стоимость</a>
-            <a class="btn btn--ghost btn--lg" data-tel hidden>Позвонить</a>
+            <a href="#order" class="btn btn--accent btn--lg" data-scroll>Рассчитать стоимость</a>
+            <a class="btn btn--outline btn--lg" data-tel hidden>Позвонить</a>
           </div>
         </div>
-        <dl class="tariff" id="tariff" data-reveal aria-label="Тарифы"></dl>
+      </div>
+    </section>
+
+    <section class="reviews" id="reviews" aria-labelledby="reviewsTitle" hidden>
+      <div class="wrap">
+        <div class="sec-head" data-reveal>
+          <h2 class="sec-title" id="reviewsTitle">Отзывы</h2>
+          <a class="sec-link" id="reviewsLink" target="_blank" rel="noopener" hidden>Все отзывы на Авито</a>
+        </div>
+        <ul class="reviews__list" id="reviewsList"></ul>
       </div>
     </section>
 
     <section class="order-section" id="order" aria-labelledby="orderTitle">
       <div class="wrap">
-        <h2 class="section-title" id="orderTitle" data-reveal>Расчёт и заявка</h2>
+        <div class="sec-head sec-head--stack" data-reveal>
+          <h2 class="sec-title" id="orderTitle">Расчёт стоимости</h2>
+          <p class="sec-sub">Цена считается сразу. Готовая заявка уходит в мессенджер — звонить не обязательно.</p>
+        </div>
+
         <form class="order" id="orderForm" novalidate>
           <div class="order__fields">
 
-            <fieldset class="block" data-reveal>
-              <legend class="block__title"><span class="block__n">1</span>Машина</legend>
+            <fieldset class="group" data-reveal>
+              <legend class="group__title">Машина</legend>
               <div class="vehicles" id="vehicleChoice" role="radiogroup" aria-label="Выбор машины"></div>
             </fieldset>
 
-            <fieldset class="block" data-reveal>
-              <legend class="block__title"><span class="block__n">2</span>Адреса</legend>
+            <fieldset class="group" data-reveal>
+              <legend class="group__title">Адреса</legend>
               <div class="field" data-field="from">
                 <label for="from">Откуда <i aria-hidden="true">*</i></label>
                 <input id="from" name="from" type="text" placeholder="Улица, дом" autocomplete="street-address" required>
@@ -104,8 +124,8 @@
               </div>
             </fieldset>
 
-            <fieldset class="block" data-reveal>
-              <legend class="block__title"><span class="block__n">3</span>Время и грузчики</legend>
+            <fieldset class="group" data-reveal>
+              <legend class="group__title">Время и грузчики</legend>
               <div class="pair">
                 <div class="field" data-field="date">
                   <label for="date">Дата <i aria-hidden="true">*</i></label>
@@ -118,14 +138,13 @@
               </div>
 
               <div class="stepper" data-stepper="hours">
-                <span class="stepper__label" id="hoursLabel">Часов работы</span>
+                <span class="stepper__label" id="hoursLabel">Часов работы <small id="hoursHint"></small></span>
                 <div class="stepper__ctrl">
                   <button type="button" class="stepper__btn" data-step="-1" aria-label="Меньше часов">−</button>
                   <output class="stepper__val" id="hoursVal" aria-labelledby="hoursLabel" aria-live="polite"></output>
                   <button type="button" class="stepper__btn" data-step="1" aria-label="Больше часов">+</button>
                 </div>
               </div>
-              <p class="field__hint" id="hoursHint"></p>
 
               <div class="stepper" data-stepper="movers">
                 <span class="stepper__label" id="moversLabel">Грузчиков <small id="moverRate"></small></span>
@@ -137,21 +156,21 @@
               </div>
             </fieldset>
 
-            <fieldset class="block" data-reveal>
-              <legend class="block__title"><span class="block__n">4</span>Груз</legend>
+            <fieldset class="group" data-reveal>
+              <legend class="group__title">Груз</legend>
               <div class="field" id="cargoField" hidden>
-                <span class="field__label">Что за груз</span>
+                <span class="field__label">Что везём</span>
                 <div class="chips" id="cargoList"></div>
               </div>
               <div class="extras" id="extrasList"></div>
               <div class="field">
-                <label for="comment">Что перевозим</label>
+                <label for="comment">Подробности</label>
                 <textarea id="comment" name="comment" rows="3" placeholder="Например: диван, холодильник, 15 коробок"></textarea>
               </div>
             </fieldset>
 
-            <fieldset class="block" data-reveal>
-              <legend class="block__title"><span class="block__n">5</span>Контакты</legend>
+            <fieldset class="group" data-reveal>
+              <legend class="group__title">Контакты</legend>
               <div class="pair pair--wide">
                 <div class="field">
                   <label for="clientName">Имя</label>
@@ -167,7 +186,7 @@
 
           <aside class="summary" id="estimate" aria-labelledby="estimateTitle">
             <div class="summary__in">
-              <h2 class="summary__title" id="estimateTitle">Предварительная стоимость</h2>
+              <h2 class="summary__title" id="estimateTitle">Ваш расчёт</h2>
               <ul class="summary__lines" id="estimateLines"></ul>
               <p class="summary__total">
                 <span>Примерно</span>
@@ -176,7 +195,7 @@
               <p class="summary__note" id="estimateNote"></p>
               <div class="form-error" id="formError" role="alert" hidden></div>
               <div class="send" id="sendButtons"></div>
-              <button type="button" class="btn btn--ghost btn--block" id="copyBtn">Скопировать заявку</button>
+              <button type="button" class="btn btn--outline btn--block" id="copyBtn">Скопировать заявку</button>
               <div class="manual-copy" id="manualCopy" hidden>
                 <label for="manualCopyText">Скопируйте текст заявки вручную</label>
                 <textarea id="manualCopyText" rows="8" readonly></textarea>
@@ -190,8 +209,9 @@
 
   <footer class="foot">
     <div class="wrap foot__in">
-      <p><strong data-bind="name"></strong> · <span data-bind="city"></span></p>
-      <p><a class="foot__tel" data-tel hidden><span data-bind="phone"></span></a></p>
+      <p class="foot__name" data-bind="name"></p>
+      <p class="foot__areas" id="footAreas"></p>
+      <a class="foot__tel" data-tel hidden><span data-bind="phone"></span></a>
       <p class="foot__note">Цены на сайте предварительные. Итог — по фактическому времени работы.</p>
     </div>
   </footer>
@@ -201,7 +221,7 @@
       <small>Примерно</small>
       <strong id="barTotal"></strong>
     </div>
-    <a href="#estimate" class="btn btn--primary" data-scroll>Оформить</a>
+    <a href="#estimate" class="btn btn--accent" data-scroll>Оформить</a>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
