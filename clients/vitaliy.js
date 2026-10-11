@@ -11,7 +11,7 @@ Object.assign(window.SITE_CONFIG, {
   sinceYear: null,
   rating: "5,0",
   reviewsCount: 36,
-  reviewsUrl: "",           // ← ссылка на его профиль на Авито
+  reviewsUrl: "https://www.avito.ru/moskva/predlozheniya_uslug/gruzoperevozki_gazel_6metrov_1670562747",
   areas: "Москва, Королёв, Мытищи, Долгопрудный, Балашиха, Пушкино, Реутов",
   noindex: true,
 
