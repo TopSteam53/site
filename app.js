@@ -171,7 +171,6 @@
       $("#sellerNote").textContent = cfg.sellerNote || "";
       $("#sellerNote").hidden = !cfg.sellerNote;
     }
-    $("#descTitle").hidden = !cfg.tagline;
 
     var areas = cfg.areas ? "Выезд: " + cfg.areas : "";
     $("#areas").textContent = areas;
@@ -186,7 +185,22 @@
       if (cfg.reviewsUrl) { rating.href = cfg.reviewsUrl; rating.target = "_blank"; rating.rel = "noopener"; }
       else if ((cfg.reviews || []).length) rating.href = "#reviews";
       else rating.removeAttribute("href");
+
+      var top = $("#topRating");
+      top.hidden = false;
+      top.innerHTML = starSvg + esc(cfg.rating) + (cfg.reviewsCount ? " <small>· " + cfg.reviewsCount + "</small>" : "");
+      top.setAttribute("aria-label", "Рейтинг " + cfg.rating + (cfg.reviewsCount ? ", " + cfg.reviewsCount + " " + plural(cfg.reviewsCount, "отзыв", "отзыва", "отзывов") : ""));
+      if (rating.hasAttribute("href")) { top.href = rating.href; if (cfg.reviewsUrl) { top.target = "_blank"; top.rel = "noopener"; } }
     }
+
+    var tick = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg>';
+    var perks = cfg.perks || [];
+    $("#perks").hidden = !perks.length;
+    $("#perks").innerHTML = perks.map(function (p) { return "<li>" + tick + "<span>" + esc(p) + "</span></li>"; }).join("");
+
+    $("#finalSub").textContent = (cfg.telegram || cfg.max)
+      ? "Пришлите фото вещей или опишите груз — " + (cfg.ownerName || "исполнитель") + " подскажет машину и посчитает точно."
+      : "Опишите груз в калькуляторе выше или позвоните — подскажем машину и посчитаем точно.";
   }
 
   // Фото для галереи: gallery → heroPhoto → фото машин
@@ -217,9 +231,48 @@
       return "<div><dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>";
     }).join("");
 
-    var photos = galleryPhotos();
-    $("#hero").classList.toggle("hero--nophoto", !photos.length);
-    renderGallery(photos);
+    var body = cfg.body;
+    var fits = cfg.fits || [];
+    $("#bodyCard").hidden = !body && !fits.length;
+    $("#bodySvg").style.display = body ? "" : "none";
+    if (body) {
+      $("#bodyLen").textContent = body.length || "";
+      $("#bodyHeight").textContent = body.height || "";
+      $("#bodyWidth").textContent = body.width ? "ширина " + body.width : "";
+    }
+    $("#fitsBox").hidden = !fits.length;
+    $("#fits").innerHTML = fits.map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("");
+
+    renderFaq();
+    renderGallery(galleryPhotos());
+  }
+
+  // Вопросы собираются из настроек: реальные цифры, а не общие слова
+  function renderFaq() {
+    var hours = cfg.minHours + " " + plural(cfg.minHours, "час", "часа", "часов");
+    var qa = [[
+      "Как считается цена?",
+      rub(minPrice()) + " за час работы машины" + (cfg.supplyHours ? " плюс " + cfg.supplyHours + " ч на подачу" : "") +
+        ". Минимальный заказ — " + hours + ". " +
+        (cfg.maxMovers ? "Грузчик — " + rub(cfg.moverPrice) + " в час за человека. " : "") +
+        "Платите по фактическому времени: калькулятор показывает ориентир.",
+    ]];
+    if (cfg.outsideKmPrice) {
+      qa.push(["Сколько стоит выезд за " + cfg.ringRoad + "?",
+        rub(cfg.outsideKmPrice) + " за километр" + (cfg.outsideRoundTrip ? ", считаем дорогу туда и обратно" : "") + ". По городу — без доплат за километры."]);
+    }
+    if (cfg.maxMovers && cfg.floorPrice) {
+      qa.push(["Что, если нет грузового лифта?",
+        "Подъём или спуск без лифта — " + rub(cfg.floorPrice) + " за этаж на каждом адресе, когда работают грузчики. Первый этаж бесплатно."]);
+    }
+    qa.push(["Как оставить заявку?",
+      (cfg.telegram || cfg.max)
+        ? "Заполните калькулятор и нажмите кнопку мессенджера — заявка со всеми деталями откроется в чате. Останется отправить."
+        : "Заполните калькулятор и скопируйте заявку — или позвоните."]);
+    (cfg.faq || []).forEach(function (f) { qa.push(f); });
+    $("#faqList").innerHTML = qa.map(function (q) {
+      return "<details><summary>" + esc(q[0]) + "</summary><p>" + esc(q[1]) + "</p></details>";
+    }).join("");
   }
 
   // ---------- галерея ----------
@@ -443,12 +496,20 @@
 
   function renderSendButtons() {
     var html = "", first = true;
-    function cls() { var c = first ? "btn--accent" : "btn--outline"; first = false; return c; }
+    function cls() { var c = first ? "btn--accent" : "btn--line"; first = false; return c; }
     if (cfg.telegram) html += '<a class="btn btn--block ' + cls() + '" id="sendTg" href="https://t.me/' + esc(cfg.telegram.replace(/^@/, "")) + '" target="_blank" rel="noopener">Отправить в Telegram</a>';
     if (cfg.max) html += '<a class="btn btn--block ' + cls() + '" id="sendMax" href="' + esc(cfg.max) + '" target="_blank" rel="noopener">Написать в MAX</a>';
     if (!html) html = '<p class="demo-note">Демо-версия. Здесь будут кнопки «Отправить в Telegram» и «Написать в MAX» — заявка придёт владельцу готовым сообщением.</p>';
-    if (cfg.phone) html += '<a class="btn btn--block btn--outline" href="' + esc(telHref(cfg.phone)) + '">Позвонить</a>';
+    if (cfg.phone) html += '<a class="btn btn--block btn--line" href="' + esc(telHref(cfg.phone)) + '">Позвонить</a>';
     $("#sendButtons").innerHTML = html;
+
+    // Финальный блок: прямые ссылки в мессенджеры, без заявки
+    var fin = "";
+    if (cfg.telegram) fin += '<a class="btn btn--accent btn--lg" href="https://t.me/' + esc(cfg.telegram.replace(/^@/, "")) + '" target="_blank" rel="noopener">Написать в Telegram</a>';
+    if (cfg.max) fin += '<a class="btn ' + (cfg.telegram ? "btn--line" : "btn--accent") + ' btn--lg" href="' + esc(cfg.max) + '" target="_blank" rel="noopener">Написать в MAX</a>';
+    if (cfg.phone) fin += '<a class="btn btn--line btn--lg" href="' + esc(telHref(cfg.phone)) + '">Позвонить</a>';
+    if (!fin) fin = '<a class="btn btn--accent btn--lg" href="#order" data-scroll>Перейти к расчёту</a>';
+    $("#finalButtons").innerHTML = fin;
   }
 
   // ---------- проверка формы ----------
