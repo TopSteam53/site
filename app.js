@@ -902,7 +902,7 @@
     loadSheet().then(render);
   }
 
-  // Демо под конкретного клиента: index.html?c=vitaliy загружает clients/vitaliy.js
+  // Демо под конкретного клиента: index.html?c=ivan загружает clients/ivan.js
   if (client) {
     var s = document.createElement("script");
     s.src = "clients/" + client + ".js";
