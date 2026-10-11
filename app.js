@@ -116,13 +116,15 @@
     return Math.min.apply(null, list.map(function (v) { return v.price; }));
   }
 
+  var starSvg = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>';
+  function stars(n) { return new Array(n + 1).join(starSvg); }
+
   function bindTexts() {
     var texts = {
       name: cfg.name,
       tagline: cfg.tagline,
       phone: cfg.phone,
       city: cfg.city,
-      cityLine: "Грузоперевозки · " + cfg.city + " и область",
       outsideLabel: "Км за " + cfg.ringRoad + ", если едем за город",
     };
     $all("[data-bind]").forEach(function (el) {
@@ -157,54 +159,88 @@
     $("#estimateNote").textContent = "Оплата — по фактическому времени. Точную сумму " +
       (cfg.ownerName || "исполнитель") + " подтвердит после проверки адресов.";
 
-    var star = '<svg class="star" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>';
-    var trust = [];
+    var areas = cfg.areas ? "Выезд: " + cfg.areas : "";
+    $("#areas").textContent = areas;
+    $("#areas").hidden = !areas;
+    $("#footAreas").textContent = areas || cfg.city;
+
+    var rating = $("#rating");
     if (cfg.rating) {
-      trust.push(star + esc(cfg.rating) + (cfg.reviewsCount
-        ? " · " + cfg.reviewsCount + " " + plural(cfg.reviewsCount, "отзыв", "отзыва", "отзывов") + " на Авито" : ""));
+      rating.hidden = false;
+      rating.innerHTML = '<span class="rating__stars">' + stars(5) + "</span><b>" + esc(cfg.rating) + "</b>" +
+        (cfg.reviewsCount ? "<u>" + cfg.reviewsCount + " " + plural(cfg.reviewsCount, "отзыв", "отзыва", "отзывов") + " на Авито</u>" : "");
+      if (cfg.reviewsUrl) { rating.href = cfg.reviewsUrl; rating.target = "_blank"; rating.rel = "noopener"; }
+      else if ((cfg.reviews || []).length) rating.href = "#reviews";
+      else rating.removeAttribute("href");
     }
-    if (cfg.sinceYear) trust.push("С " + cfg.sinceYear + " года");
-    (cfg.extraBadges || []).forEach(function (b) { trust.push(esc(b)); });
-    $("#trust").innerHTML = trust.map(function (t) { return "<li>" + t + "</li>"; }).join("");
-    $("#trust").hidden = !trust.length;
   }
 
   function renderHero() {
     $("#heroPrice").textContent = rub(minPrice());
-    // Цена машины уже крупно в заголовке — здесь остальные условия
-    var rows = [];
-    if (cfg.maxMovers) rows.push(["Грузчик", rub(cfg.moverPrice) + " / ч", ""]);
-    rows.push(["Минимальный заказ", cfg.minHours + " " + plural(cfg.minHours, "час", "часа", "часов"),
-      cfg.supplyHours ? "+ " + cfg.supplyHours + " ч подача машины" : ""]);
-    if (cfg.outsideKmPrice) rows.push(["За " + cfg.ringRoad, rub(cfg.outsideKmPrice) + " / км", cfg.outsideRoundTrip ? "туда и обратно" : ""]);
-    if (cfg.floorPrice && cfg.maxMovers) rows.push(["Этаж без лифта", rub(cfg.floorPrice), "за каждый этаж"]);
-    $("#tariff").innerHTML = rows.map(function (r) {
-      return "<div><dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + (r[2] ? "<small>" + esc(r[2]) + "</small>" : "") + "</dd></div>";
+    $("#heroMin").textContent = "минимум " + cfg.minHours + " " + plural(cfg.minHours, "час", "часа", "часов") +
+      (cfg.supplyHours ? " + " + cfg.supplyHours + " ч подача" : "");
+
+    var rows = (cfg.facts || []).slice();
+    if (cfg.maxMovers) rows.push(["Грузчик", rub(cfg.moverPrice) + " / час"]);
+    if (cfg.outsideKmPrice) rows.push(["За " + cfg.ringRoad, rub(cfg.outsideKmPrice) + " / км" + (cfg.outsideRoundTrip ? ", туда и обратно" : "")]);
+    $("#facts").innerHTML = rows.map(function (r) {
+      return "<div><dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>";
     }).join("");
+
+    var withPhoto = cfg.vehicles.filter(function (v) { return v.photo; })[0];
+    var photo = cfg.heroPhoto || (withPhoto && withPhoto.photo);
+    $("#heroMedia").hidden = !photo;
+    $("#hero").classList.toggle("hero--nophoto", !photo);
+    if (photo) {
+      var img = $("#heroImg");
+      if (img.getAttribute("src") !== photo) img.src = photo;
+      img.alt = cfg.heroPhotoAlt || (withPhoto ? withPhoto.title : cfg.name);
+    }
+  }
+
+  function renderReviews() {
+    var list = cfg.reviews || [];
+    $("#reviews").hidden = !list.length;
+    if (!list.length) return;
+    $("#reviewsList").innerHTML = list.map(function (r) {
+      return '<li class="review" data-reveal>' +
+        '<span class="review__stars" aria-label="Оценка ' + (r.rating || 5) + ' из 5">' + stars(r.rating || 5) + "</span>" +
+        '<p class="review__text">' + esc(r.text) + "</p>" +
+        '<p class="review__meta">' + esc(r.author) + (r.date ? " · " + esc(r.date) : "") + "</p></li>";
+    }).join("");
+    var link = $("#reviewsLink");
+    link.hidden = !cfg.reviewsUrl;
+    if (cfg.reviewsUrl) link.href = cfg.reviewsUrl;
   }
 
   // ---------- машины, груз, доп. услуги ----------
-  var truckSvg = '<svg viewBox="0 0 96 56" aria-hidden="true"><rect x="4" y="8" width="58" height="32" rx="3"/><path class="cab" d="M62 18h15l13 13v9H62z"/><circle cx="22" cy="44" r="7"/><circle cx="76" cy="44" r="7"/></svg>';
-  var tickSvg = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>';
+  // Без фото показываем объём кузова крупной цифрой, а не картинку-иконку
+  function vehicleBadge(v) {
+    if (v.badge) return v.badge;
+    var m = /(\d+(?:[.,]\d+)?)\s*м³/.exec(v.specs || "") || /(\d+(?:[.,]\d+)?)\s*м(?![а-яё])/i.exec(v.title || "");
+    return m ? m[0] : "";
+  }
 
   function renderOptions() {
     var firstFree = cfg.vehicles.filter(function (v) { return v.available; })[0];
     if (!state.vehicle || !state.vehicle.available) state.vehicle = firstFree || null;
 
     $("#vehicleChoice").innerHTML = cfg.vehicles.map(function (v) {
-      var pic = v.photo ? '<img src="' + esc(v.photo) + '" alt="' + esc(v.title) + '" loading="lazy">' : truckSvg;
+      var pic = v.photo
+        ? '<img src="' + esc(v.photo) + '" alt="' + esc(v.title) + '" loading="lazy">'
+        : '<span class="vcard__badge">' + esc(vehicleBadge(v)) + "</span>";
       var checked = state.vehicle && state.vehicle.id === v.id;
       return '<label class="vcard' + (v.available ? "" : " vcard--busy") + '">' +
         '<input type="radio" name="vehicle" value="' + esc(v.id) + '"' + (v.available ? "" : " disabled") + (checked ? " checked" : "") + ">" +
         '<span class="vcard__body">' +
           '<span class="vcard__pic">' + pic + "</span>" +
-          '<span class="vcard__title">' + esc(v.title) + "</span>" +
-          '<span class="vcard__specs">' + esc(v.specs) + "</span>" +
-          '<span class="vcard__price">' + rub(v.price) + " <small>/ час</small></span>" +
-          (v.available ? "" : '<span class="vcard__busy">Сейчас занята</span>') +
-          '<span class="vcard__status" aria-hidden="true">' +
-            (v.available ? '<span class="vcard__ring"></span><span class="vcard__tick">' + tickSvg + "</span>" : "") +
+          '<span class="vcard__info">' +
+            '<span class="vcard__title">' + esc(v.title) + "</span>" +
+            '<span class="vcard__specs">' + esc(v.specs) + "</span>" +
+            '<span class="vcard__price">' + rub(v.price) + " <small>/ час</small></span>" +
+            (v.available ? "" : '<span class="vcard__busy">Сейчас занята</span>') +
           "</span>" +
+          '<span class="vcard__dot" aria-hidden="true"></span>' +
         "</span></label>";
     }).join("");
 
@@ -316,8 +352,7 @@
     $('[data-stepper="hours"] [data-step="1"]').disabled = state.hours >= cfg.maxHours;
     $('[data-stepper="movers"] [data-step="-1"]').disabled = state.movers <= 0;
     $('[data-stepper="movers"] [data-step="1"]').disabled = state.movers >= cfg.maxMovers;
-    $("#hoursHint").textContent = "Минимум " + cfg.minHours + " " + plural(cfg.minHours, "час", "часа", "часов") +
-      (cfg.supplyHours ? " + " + cfg.supplyHours + " ч на подачу машины" : "") + ".";
+    $("#hoursHint").textContent = "минимум " + cfg.minHours + " ч" + (cfg.supplyHours ? ", подача +" + cfg.supplyHours + " ч" : "");
 
     // Telegram подставляет текст в чат сам; в MAX заявку вставляют из буфера
     var tg = $("#sendTg");
@@ -325,12 +360,12 @@
   }
 
   function renderSendButtons() {
-    var html = "", primaryUsed = false;
-    function cls() { var c = primaryUsed ? "btn--dark" : "btn--primary"; primaryUsed = true; return c; }
+    var html = "", first = true;
+    function cls() { var c = first ? "btn--accent" : "btn--outline"; first = false; return c; }
     if (cfg.telegram) html += '<a class="btn btn--block ' + cls() + '" id="sendTg" href="https://t.me/' + esc(cfg.telegram.replace(/^@/, "")) + '" target="_blank" rel="noopener">Отправить в Telegram</a>';
     if (cfg.max) html += '<a class="btn btn--block ' + cls() + '" id="sendMax" href="' + esc(cfg.max) + '" target="_blank" rel="noopener">Написать в MAX</a>';
-    if (!html) html = '<p class="demo-note">Демо-версия: заявки пока никуда не отправляются. Подключим ваш Telegram или MAX за пару минут.</p>';
-    if (cfg.phone) html += '<a class="btn btn--block btn--ghost" href="' + esc(telHref(cfg.phone)) + '">Позвонить</a>';
+    if (!html) html = '<p class="demo-note">Демо-версия. Здесь будут кнопки «Отправить в Telegram» и «Написать в MAX» — заявка придёт владельцу готовым сообщением.</p>';
+    if (cfg.phone) html += '<a class="btn btn--block btn--outline" href="' + esc(telHref(cfg.phone)) + '">Позвонить</a>';
     $("#sendButtons").innerHTML = html;
   }
 
@@ -598,6 +633,7 @@
     state.hours = cfg.minHours;
     state.movers = Math.min(cfg.defaultMovers != null ? cfg.defaultMovers : 2, cfg.maxMovers);
     bindTexts();
+    renderReviews();
     if (!cfg.maxMovers) $('[data-stepper="movers"]').hidden = true;
     renderSendButtons();
     initDate();
