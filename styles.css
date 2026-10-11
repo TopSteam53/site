@@ -9,7 +9,7 @@
   --ok: #2f9e44;
   --busy: #c92a2a;
   --tg: #229ed9;
-  --wa: #25a244;
+  --max: #5b3ff8;
   --radius: 14px;
   --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 16px rgba(0, 0, 0, .05);
   color-scheme: light;
@@ -67,7 +67,8 @@ a { color: inherit; }
 .btn--lg { min-height: 54px; padding: 0 28px; font-size: 17px; }
 .btn--ghost { background: transparent; border-color: var(--line); color: var(--text); }
 .btn--tg { background: var(--tg); }
-.btn--wa { background: var(--wa); }
+.btn--max { background: var(--max); }
+.demo-note { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--alt); color: var(--muted); font-size: 14px; }
 
 /* sections */
 .section { padding: 32px 0; }
@@ -127,6 +128,11 @@ input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 
 .check--inline { margin-bottom: 12px; font-size: 14px; line-height: 1.25; }
 
 .choice { display: grid; gap: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip span { display: inline-block; padding: 8px 14px; border: 1.5px solid var(--line); border-radius: 999px; font-size: 15px; cursor: pointer; }
+.chip input:checked + span { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); font-weight: 600; }
+.chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 .opt { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer; }
 .opt input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; flex: none; }
 .opt__t { flex: 1; font-weight: 600; }

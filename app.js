@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var cfg = window.SITE_CONFIG;
+  var cfg;
   var form = document.getElementById("orderForm");
   var state = { vehicle: null, hours: 0, movers: 2 };
 
@@ -87,7 +87,7 @@
     var round = cfg.ringRoad;
     var channels = [];
     if (cfg.telegram) channels.push("Telegram");
-    if (cfg.whatsapp) channels.push("WhatsApp");
+    if (cfg.max) channels.push("MAX");
     var texts = {
       name: cfg.name,
       tagline: cfg.tagline,
@@ -96,7 +96,7 @@
       cityLine: "Грузоперевозки · " + cfg.city + " и область",
       outsideLabel: "Км за " + round + " (если едем за город)",
       sendHint: channels.length
-        ? "Готовая заявка откроется в " + channels.join(" или ") + " — останется нажать «Отправить»."
+        ? "Нажмите «Написать в " + channels.join("» или «Написать в ") + "» — заявка скопируется, останется вставить её в чат и отправить."
         : "Позвоните, и мы всё уточним.",
       confirmHint: (cfg.ownerName ? cfg.ownerName : "Исполнитель") + " проверит адреса и подтвердит время и цену.",
     };
@@ -110,10 +110,18 @@
     });
     document.title = cfg.name + " — грузоперевозки, " + cfg.city;
     document.documentElement.style.setProperty("--accent", cfg.accentColor);
+    if (cfg.heroTitle) $(".hero__title").textContent = cfg.heroTitle;
+    if (cfg.commentPlaceholder) form.elements.comment.placeholder = cfg.commentPlaceholder;
+    if (cfg.noindex) {
+      var robots = document.createElement("meta");
+      robots.name = "robots"; robots.content = "noindex, nofollow";
+      document.head.appendChild(robots);
+    }
 
     var badges = [];
     if (cfg.rating) badges.push("★ " + cfg.rating + (cfg.reviewsCount ? " · " + cfg.reviewsCount + " " + plural(cfg.reviewsCount, "отзыв", "отзыва", "отзывов") + " на Авито" : ""));
     if (cfg.sinceYear) badges.push("Работаем с " + cfg.sinceYear + " года");
+    badges = badges.concat(cfg.extraBadges || []);
     badges.push("Цена онлайн за минуту");
     $("#badges").innerHTML = badges.map(function (b) { return "<li>" + esc(b) + "</li>"; }).join("");
   }
@@ -147,7 +155,13 @@
         '<span class="opt__s">' + (v.available ? rub(v.price) + "/ч" : "занята") + "</span></label>";
     }).join("");
 
-    $("#extrasList").innerHTML = cfg.extras.map(function (x) {
+    var cargo = cfg.cargoTypes || [];
+    $("#cargoField").hidden = !cargo.length;
+    $("#cargoList").innerHTML = cargo.map(function (c, i) {
+      return '<label class="chip"><input type="radio" name="cargo" value="' + esc(c) + '"' + (i === 0 ? " checked" : "") + "><span>" + esc(c) + "</span></label>";
+    }).join("");
+
+    $("#extrasList").innerHTML = (cfg.extras || []).map(function (x) {
       return '<label class="check"><input type="checkbox" name="extra" value="' + esc(x.id) + '">' +
         "<span>" + esc(x.title) + " <em>+" + rub(x.price) + "</em></span></label>";
     }).join("");
@@ -193,7 +207,7 @@
 
   function selectedExtras() {
     var ids = $all('input[name="extra"]:checked').map(function (i) { return i.value; });
-    return cfg.extras.filter(function (x) { return ids.indexOf(x.id) >= 0; });
+    return (cfg.extras || []).filter(function (x) { return ids.indexOf(x.id) >= 0; });
   }
 
   // ---------- message ----------
@@ -220,7 +234,9 @@
     ];
     if (km > 0) out.push("За " + cfg.ringRoad + ": " + km + " км");
     out.push("Дата: " + fmtDate(val("date")) + (val("time") ? ", подача в " + val("time") : ""));
-    out.push("Часов: " + state.hours + ", грузчиков: " + state.movers);
+    var cargo = form.querySelector('input[name="cargo"]:checked');
+    if (cargo) out.push("Груз: " + cargo.value);
+    out.push("Часов: " + state.hours + ", " + (state.movers ? "грузчиков: " + state.movers : "без грузчиков"));
     if (ex.length) out.push("Доп. услуги: " + ex.join(", "));
     if (val("comment")) out.push("Что везём: " + val("comment"));
     out.push("");
@@ -242,16 +258,16 @@
     $("#hoursHint").textContent = "Минимальный заказ — " + cfg.minHours + " " + plural(cfg.minHours, "час", "часа", "часов") +
       (cfg.supplyHours ? ", плюс " + cfg.supplyHours + " ч на подачу машины" : "") + ".";
 
-    var msg = encodeURIComponent(buildMessage(res));
-    var tg = $("#sendTg"), wa = $("#sendWa");
-    if (tg) tg.href = "https://t.me/" + cfg.telegram.replace(/^@/, "") + "?text=" + msg;
-    if (wa) wa.href = "https://wa.me/" + cfg.whatsapp.replace(/\D/g, "") + "?text=" + msg;
+    // Telegram умеет подставить текст в чат; MAX — нет, туда заявку вставляют из буфера
+    var tg = $("#sendTg");
+    if (tg) tg.href = "https://t.me/" + cfg.telegram.replace(/^@/, "") + "?text=" + encodeURIComponent(buildMessage(res));
   }
 
   function renderSendButtons() {
     var html = "";
     if (cfg.telegram) html += '<a class="btn btn--primary btn--tg" id="sendTg" target="_blank" rel="noopener">Отправить в Telegram</a>';
-    if (cfg.whatsapp) html += '<a class="btn btn--primary btn--wa" id="sendWa" target="_blank" rel="noopener">Отправить в WhatsApp</a>';
+    if (cfg.max) html += '<a class="btn btn--primary btn--max" id="sendMax" href="' + esc(cfg.max) + '" target="_blank" rel="noopener">Написать в MAX</a>';
+    if (!html) html = '<p class="demo-note">Демо-версия: заявки пока никуда не отправляются. Подключим ваш Telegram или MAX за пару минут.</p>';
     if (cfg.phone) html += '<a class="btn btn--ghost" href="tel:' + esc(cfg.phone.replace(/[^\d+]/g, "")) + '">Позвонить</a>';
     $("#sendButtons").innerHTML = html;
   }
@@ -308,14 +324,22 @@
     });
 
     $("#sendButtons").addEventListener("click", function (e) {
-      var a = e.target.closest("#sendTg, #sendWa");
-      if (a && !validate()) e.preventDefault();
+      var a = e.target.closest("#sendTg, #sendMax");
+      if (!a) return;
+      if (!validate()) { e.preventDefault(); return; }
+      // Копируем всегда: в MAX текст не подставляется, в Telegram — подстраховка
+      copyRequest(a.id === "sendMax"
+        ? "Заявка скопирована — вставьте её в чат MAX и отправьте"
+        : "Заявка скопирована на случай, если текст не подставился в чат");
     });
 
     $("#copyBtn").addEventListener("click", function () {
-      if (!validate()) return;
+      if (validate()) copyRequest("Заявка скопирована — вставьте её в чат");
+    });
+
+    function copyRequest(message) {
       var text = buildMessage(calc());
-      var done = function () { toast("Заявка скопирована — вставьте её в чат"); };
+      var done = function () { toast(message); };
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(done, fallbackCopy);
       } else fallbackCopy();
@@ -328,7 +352,7 @@
         try { document.execCommand("copy"); done(); } catch (_) { toast("Не удалось скопировать"); }
         ta.remove();
       }
-    });
+    }
 
     // Нижняя плашка прячется, когда блок с расчётом на экране
     var bar = $("#bar");
@@ -362,12 +386,28 @@
   }
 
   // ---------- start ----------
-  state.hours = cfg.minHours;
-  state.movers = Math.min(2, cfg.maxMovers);
-  bindTexts();
-  renderSendButtons();
-  initDate();
-  wire();
-  render();
-  loadSheet().then(render);
+  function start() {
+    cfg = window.SITE_CONFIG;
+    state.hours = cfg.minHours;
+    state.movers = Math.min(cfg.defaultMovers != null ? cfg.defaultMovers : 2, cfg.maxMovers);
+    bindTexts();
+    if (!cfg.maxMovers) $('[data-stepper="movers"]').hidden = true;
+    renderSendButtons();
+    initDate();
+    wire();
+    render();
+    loadSheet().then(render);
+  }
+
+  // Демо под конкретного клиента: index.html?c=vitaliy загружает clients/vitaliy.js
+  var client = new URLSearchParams(location.search).get("c");
+  if (client && /^[a-z0-9-]+$/.test(client)) {
+    var s = document.createElement("script");
+    s.src = "clients/" + client + ".js";
+    s.onload = start;
+    s.onerror = start;
+    document.body.appendChild(s);
+  } else {
+    start();
+  }
 })();
