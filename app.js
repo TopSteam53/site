@@ -4,6 +4,8 @@
   var cfg;
   var form = document.getElementById("orderForm");
   var state = { vehicle: null, hours: 0, movers: 2 };
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  var isMobile = window.matchMedia("(max-width: 1023px)");
 
   // ---------- helpers ----------
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -20,17 +22,42 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  function num(name, fallback) {
-    var v = parseInt(form.elements[name].value, 10);
-    return isNaN(v) ? fallback : v;
-  }
   function val(name) { return form.elements[name].value.trim(); }
+  // Число из поля с учётом min/max; пустое или мусор — fallback
+  function num(name, fallback) {
+    var el = form.elements[name];
+    var v = parseInt(el.value, 10);
+    if (isNaN(v)) return fallback;
+    var min = el.min !== "" ? Number(el.min) : -Infinity;
+    var max = el.max !== "" ? Number(el.max) : Infinity;
+    return Math.min(max, Math.max(min, v));
+  }
+  function telHref(phone) { return "tel:" + phone.replace(/[^\d+]/g, ""); }
+
+  var toastTimer;
   function toast(text) {
     var t = $("#toast");
     t.textContent = text;
-    t.hidden = false;
-    clearTimeout(toast._t);
-    toast._t = setTimeout(function () { t.hidden = true; }, 2600);
+    t.classList.add("is-on");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("is-on"); }, 2800);
+  }
+
+  // Плавная смена цены
+  function animateNumber(el, to) {
+    var from = el._value == null ? to : el._value;
+    el._value = to;
+    cancelAnimationFrame(el._raf);
+    if (from === to || reduceMotion.matches) { el.textContent = rub(to); return; }
+    var start = null, dur = 400;
+    function step(ts) {
+      if (start === null) start = ts;
+      var k = Math.min(1, (ts - start) / dur);
+      var e = 1 - Math.pow(1 - k, 3);
+      el.textContent = rub(from + (to - from) * e);
+      if (k < 1) el._raf = requestAnimationFrame(step);
+    }
+    el._raf = requestAnimationFrame(step);
   }
 
   // ---------- Google Sheet overrides ----------
@@ -63,7 +90,7 @@
       var n = parseFloat(raw.replace(/\s/g, "").replace(",", "."));
       var parts = key.split(".");
       if (parts.length === 2) {
-        var item = cfg.vehicles.concat(cfg.extras).filter(function (x) { return x.id === parts[0]; })[0];
+        var item = cfg.vehicles.concat(cfg.extras || []).filter(function (x) { return x.id === parts[0]; })[0];
         if (!item) return;
         if (parts[1] === "price" && !isNaN(n)) item.price = n;
         if (parts[1] === "available") item.available = yes.test(raw);
@@ -82,35 +109,42 @@
       .catch(function (e) { console.warn("Не удалось загрузить таблицу цен, используются цены из config.js", e); });
   }
 
-  // ---------- static texts ----------
+  // ---------- тексты и первый экран ----------
+  function minPrice() {
+    var free = cfg.vehicles.filter(function (v) { return v.available; });
+    var list = free.length ? free : cfg.vehicles;
+    return Math.min.apply(null, list.map(function (v) { return v.price; }));
+  }
+
   function bindTexts() {
-    var round = cfg.ringRoad;
-    var channels = [];
-    if (cfg.telegram) channels.push("Telegram");
-    if (cfg.max) channels.push("MAX");
     var texts = {
       name: cfg.name,
       tagline: cfg.tagline,
       phone: cfg.phone,
       city: cfg.city,
       cityLine: "Грузоперевозки · " + cfg.city + " и область",
-      outsideLabel: "Км за " + round + " (если едем за город)",
-      sendHint: channels.length
-        ? "Нажмите «Написать в " + channels.join("» или «Написать в ") + "» — заявка скопируется, останется вставить её в чат и отправить."
-        : "Позвоните, и мы всё уточним.",
-      confirmHint: (cfg.ownerName ? cfg.ownerName : "Исполнитель") + " проверит адреса и подтвердит время и цену.",
+      outsideLabel: "Км за " + cfg.ringRoad + ", если едем за город",
     };
     $all("[data-bind]").forEach(function (el) {
       var v = texts[el.getAttribute("data-bind")];
       if (v != null) el.textContent = v;
     });
-    $all('[data-bind-href="tel"]').forEach(function (el) {
-      if (!cfg.phone) { el.hidden = true; return; }
-      el.href = "tel:" + cfg.phone.replace(/[^\d+]/g, "");
+    $all("[data-tel]").forEach(function (el) {
+      el.hidden = !cfg.phone;
+      if (!cfg.phone) return;
+      el.href = telHref(cfg.phone);
+      if (!el.textContent.trim()) el.textContent = cfg.phone;
+      el.setAttribute("aria-label", "Позвонить: " + cfg.phone);
     });
-    document.title = cfg.name + " — грузоперевозки, " + cfg.city;
-    document.documentElement.style.setProperty("--accent", cfg.accentColor);
-    if (cfg.heroTitle) $(".hero__title").textContent = cfg.heroTitle;
+
+    var title = cfg.name + " — грузоперевозки, " + cfg.city;
+    document.title = title;
+    var desc = document.querySelector('meta[name="description"]');
+    if (desc && cfg.tagline) desc.content = cfg.tagline;
+    var og = document.querySelector('meta[property="og:title"]');
+    if (og) og.content = title;
+
+    if (cfg.accentColor) document.documentElement.style.setProperty("--accent", cfg.accentColor);
     if (cfg.commentPlaceholder) form.elements.comment.placeholder = cfg.commentPlaceholder;
     if (cfg.noindex) {
       var robots = document.createElement("meta");
@@ -118,64 +152,91 @@
       document.head.appendChild(robots);
     }
 
-    var badges = [];
-    if (cfg.rating) badges.push("★ " + cfg.rating + (cfg.reviewsCount ? " · " + cfg.reviewsCount + " " + plural(cfg.reviewsCount, "отзыв", "отзыва", "отзывов") + " на Авито" : ""));
-    if (cfg.sinceYear) badges.push("Работаем с " + cfg.sinceYear + " года");
-    badges = badges.concat(cfg.extraBadges || []);
-    badges.push("Цена онлайн за минуту");
-    $("#badges").innerHTML = badges.map(function (b) { return "<li>" + esc(b) + "</li>"; }).join("");
+    $("#heroTitle").textContent = cfg.heroTitle || (cfg.maxMovers ? "Газель с грузчиками" : "Грузоперевозки на Газели");
+    $("#moverRate").textContent = rub(cfg.moverPrice) + " / час за человека";
+    $("#estimateNote").textContent = "Оплата — по фактическому времени. Точную сумму " +
+      (cfg.ownerName || "исполнитель") + " подтвердит после проверки адресов.";
+
+    var star = '<svg class="star" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>';
+    var trust = [];
+    if (cfg.rating) {
+      trust.push(star + esc(cfg.rating) + (cfg.reviewsCount
+        ? " · " + cfg.reviewsCount + " " + plural(cfg.reviewsCount, "отзыв", "отзыва", "отзывов") + " на Авито" : ""));
+    }
+    if (cfg.sinceYear) trust.push("С " + cfg.sinceYear + " года");
+    (cfg.extraBadges || []).forEach(function (b) { trust.push(esc(b)); });
+    $("#trust").innerHTML = trust.map(function (t) { return "<li>" + t + "</li>"; }).join("");
+    $("#trust").hidden = !trust.length;
   }
 
-  // ---------- fleet + choice ----------
-  var truckSvg = '<svg viewBox="0 0 96 56" aria-hidden="true"><rect x="4" y="6" width="56" height="34" rx="4"/><path d="M60 16h16l14 14v10H60z"/><path class="win" d="M66 21h9l8 8H66z"/><circle cx="22" cy="44" r="8"/><circle cx="74" cy="44" r="8"/><circle class="hub" cx="22" cy="44" r="3"/><circle class="hub" cx="74" cy="44" r="3"/></svg>';
-
-  function renderFleet() {
-    $("#fleetList").innerHTML = cfg.vehicles.map(function (v) {
-      var img = v.photo
-        ? '<img src="' + esc(v.photo) + '" alt="' + esc(v.title) + '" loading="lazy">'
-        : truckSvg;
-      return '<article class="truck' + (v.available ? "" : " truck--busy") + '">' +
-        '<div class="truck__pic">' + img + "</div>" +
-        '<div class="truck__body"><h3>' + esc(v.title) + "</h3>" +
-        "<p>" + esc(v.specs) + "</p>" +
-        '<p class="truck__price">' + rub(v.price) + " / час</p>" +
-        '<span class="tag ' + (v.available ? "tag--ok" : "tag--busy") + '">' + (v.available ? "Свободна" : "Сейчас занята") + "</span>" +
-        "</div></article>";
+  function renderHero() {
+    $("#heroPrice").textContent = rub(minPrice());
+    // Цена машины уже крупно в заголовке — здесь остальные условия
+    var rows = [];
+    if (cfg.maxMovers) rows.push(["Грузчик", rub(cfg.moverPrice) + " / ч", ""]);
+    rows.push(["Минимальный заказ", cfg.minHours + " " + plural(cfg.minHours, "час", "часа", "часов"),
+      cfg.supplyHours ? "+ " + cfg.supplyHours + " ч подача машины" : ""]);
+    if (cfg.outsideKmPrice) rows.push(["За " + cfg.ringRoad, rub(cfg.outsideKmPrice) + " / км", cfg.outsideRoundTrip ? "туда и обратно" : ""]);
+    if (cfg.floorPrice && cfg.maxMovers) rows.push(["Этаж без лифта", rub(cfg.floorPrice), "за каждый этаж"]);
+    $("#tariff").innerHTML = rows.map(function (r) {
+      return "<div><dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + (r[2] ? "<small>" + esc(r[2]) + "</small>" : "") + "</dd></div>";
     }).join("");
+  }
 
+  // ---------- машины, груз, доп. услуги ----------
+  var truckSvg = '<svg viewBox="0 0 96 56" aria-hidden="true"><rect x="4" y="8" width="58" height="32" rx="3"/><path class="cab" d="M62 18h15l13 13v9H62z"/><circle cx="22" cy="44" r="7"/><circle cx="76" cy="44" r="7"/></svg>';
+  var tickSvg = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>';
+
+  function renderOptions() {
     var firstFree = cfg.vehicles.filter(function (v) { return v.available; })[0];
     if (!state.vehicle || !state.vehicle.available) state.vehicle = firstFree || null;
 
     $("#vehicleChoice").innerHTML = cfg.vehicles.map(function (v) {
-      return '<label class="opt' + (v.available ? "" : " opt--off") + '">' +
-        '<input type="radio" name="vehicle" value="' + esc(v.id) + '"' +
-        (v.available ? "" : " disabled") +
-        (state.vehicle && state.vehicle.id === v.id ? " checked" : "") + ">" +
-        '<span class="opt__t">' + esc(v.title) + "</span>" +
-        '<span class="opt__s">' + (v.available ? rub(v.price) + "/ч" : "занята") + "</span></label>";
+      var pic = v.photo ? '<img src="' + esc(v.photo) + '" alt="' + esc(v.title) + '" loading="lazy">' : truckSvg;
+      var checked = state.vehicle && state.vehicle.id === v.id;
+      return '<label class="vcard' + (v.available ? "" : " vcard--busy") + '">' +
+        '<input type="radio" name="vehicle" value="' + esc(v.id) + '"' + (v.available ? "" : " disabled") + (checked ? " checked" : "") + ">" +
+        '<span class="vcard__body">' +
+          '<span class="vcard__pic">' + pic + "</span>" +
+          '<span class="vcard__title">' + esc(v.title) + "</span>" +
+          '<span class="vcard__specs">' + esc(v.specs) + "</span>" +
+          '<span class="vcard__price">' + rub(v.price) + " <small>/ час</small></span>" +
+          (v.available ? "" : '<span class="vcard__busy">Сейчас занята</span>') +
+          '<span class="vcard__status" aria-hidden="true">' +
+            (v.available ? '<span class="vcard__ring"></span><span class="vcard__tick">' + tickSvg + "</span>" : "") +
+          "</span>" +
+        "</span></label>";
     }).join("");
 
     var cargo = cfg.cargoTypes || [];
+    var cargoChecked = form.querySelector('input[name="cargo"]:checked');
+    var cargoVal = cargoChecked ? cargoChecked.value : cargo[0];
     $("#cargoField").hidden = !cargo.length;
-    $("#cargoList").innerHTML = cargo.map(function (c, i) {
-      return '<label class="chip"><input type="radio" name="cargo" value="' + esc(c) + '"' + (i === 0 ? " checked" : "") + "><span>" + esc(c) + "</span></label>";
+    $("#cargoList").innerHTML = cargo.map(function (c) {
+      return '<label class="chip"><input type="radio" name="cargo" value="' + esc(c) + '"' + (c === cargoVal ? " checked" : "") + "><span>" + esc(c) + "</span></label>";
     }).join("");
 
+    var picked = selectedExtras().map(function (x) { return x.id; });
     $("#extrasList").innerHTML = (cfg.extras || []).map(function (x) {
-      return '<label class="check"><input type="checkbox" name="extra" value="' + esc(x.id) + '">' +
-        "<span>" + esc(x.title) + " <em>+" + rub(x.price) + "</em></span></label>";
+      return '<label class="check"><input type="checkbox" name="extra" value="' + esc(x.id) + '"' + (picked.indexOf(x.id) >= 0 ? " checked" : "") + ">" +
+        '<span class="check__box" aria-hidden="true"></span>' +
+        '<span class="check__text">' + esc(x.title) + "</span>" +
+        '<span class="check__price">+' + rub(x.price) + "</span></label>";
     }).join("");
   }
 
-  // ---------- calculation ----------
+  function selectedExtras() {
+    var ids = $all('input[name="extra"]:checked').map(function (i) { return i.value; });
+    return (cfg.extras || []).filter(function (x) { return ids.indexOf(x.id) >= 0; });
+  }
+
+  // ---------- расчёт ----------
   function calc() {
     var lines = [], total = 0;
-    var h = state.hours, m = state.movers;
-    var v = state.vehicle;
+    var h = state.hours, m = state.movers, v = state.vehicle;
 
     if (v) {
-      var carHours = h + (cfg.supplyHours || 0);
-      var car = v.price * carHours;
+      var car = v.price * (h + (cfg.supplyHours || 0));
       lines.push([v.title + ": " + h + " ч" + (cfg.supplyHours ? " + " + cfg.supplyHours + " ч подача" : ""), car]);
       total += car;
     }
@@ -185,15 +246,15 @@
       total += movers;
 
       var floors = 0;
-      if (!form.elements.liftFrom.checked) floors += Math.max(0, num("floorFrom", 1) - 1);
-      if (!form.elements.liftTo.checked) floors += Math.max(0, num("floorTo", 1) - 1);
+      if (!form.elements.liftFrom.checked) floors += num("floorFrom", 1) - 1;
+      if (!form.elements.liftTo.checked) floors += num("floorTo", 1) - 1;
       if (floors > 0 && cfg.floorPrice) {
-        lines.push(["Подъём/спуск без лифта: " + floors + " " + plural(floors, "этаж", "этажа", "этажей"), floors * cfg.floorPrice]);
+        lines.push(["Без лифта: " + floors + " " + plural(floors, "этаж", "этажа", "этажей"), floors * cfg.floorPrice]);
         total += floors * cfg.floorPrice;
       }
     }
-    var km = Math.max(0, num("outsideKm", 0));
-    if (km > 0) {
+    var km = num("outsideKm", 0);
+    if (km > 0 && cfg.outsideKmPrice) {
       var kmTotal = km * (cfg.outsideRoundTrip ? 2 : 1);
       lines.push(["За " + cfg.ringRoad + ": " + kmTotal + " км", kmTotal * cfg.outsideKmPrice]);
       total += kmTotal * cfg.outsideKmPrice;
@@ -205,12 +266,7 @@
     return { lines: lines, total: total };
   }
 
-  function selectedExtras() {
-    var ids = $all('input[name="extra"]:checked').map(function (i) { return i.value; });
-    return (cfg.extras || []).filter(function (x) { return ids.indexOf(x.id) >= 0; });
-  }
-
-  // ---------- message ----------
+  // ---------- текст заявки ----------
   function fmtDate(iso) {
     if (!iso) return "";
     var p = iso.split("-");
@@ -224,7 +280,7 @@
 
   function buildMessage(res) {
     var ex = selectedExtras().map(function (x) { return x.title; });
-    var km = Math.max(0, num("outsideKm", 0));
+    var km = num("outsideKm", 0);
     var out = [
       "Заявка с сайта «" + cfg.name + "»",
       "",
@@ -245,77 +301,211 @@
     return out.join("\n");
   }
 
-  // ---------- render ----------
+  // ---------- отрисовка расчёта ----------
   function update() {
     var res = calc();
-    $("#estimateLines").innerHTML = res.lines.map(function (l) {
-      return "<li><span>" + esc(l[0]) + "</span><b>" + rub(l[1]) + "</b></li>";
-    }).join("");
-    $("#estimateTotal").textContent = rub(res.total);
-    $("#barTotal").textContent = rub(res.total);
+    $("#estimateLines").innerHTML = res.lines.length
+      ? res.lines.map(function (l) { return "<li><span>" + esc(l[0]) + "</span><b>" + rub(l[1]) + "</b></li>"; }).join("")
+      : "<li><span>Все машины сейчас заняты — позвоните, подберём время</span></li>";
+    animateNumber($("#estimateTotal"), res.total);
+    animateNumber($("#barTotal"), res.total);
+
     $("#hoursVal").textContent = state.hours + " ч";
     $("#moversVal").textContent = state.movers;
-    $("#hoursHint").textContent = "Минимальный заказ — " + cfg.minHours + " " + plural(cfg.minHours, "час", "часа", "часов") +
-      (cfg.supplyHours ? ", плюс " + cfg.supplyHours + " ч на подачу машины" : "") + ".";
+    $('[data-stepper="hours"] [data-step="-1"]').disabled = state.hours <= cfg.minHours;
+    $('[data-stepper="hours"] [data-step="1"]').disabled = state.hours >= cfg.maxHours;
+    $('[data-stepper="movers"] [data-step="-1"]').disabled = state.movers <= 0;
+    $('[data-stepper="movers"] [data-step="1"]').disabled = state.movers >= cfg.maxMovers;
+    $("#hoursHint").textContent = "Минимум " + cfg.minHours + " " + plural(cfg.minHours, "час", "часа", "часов") +
+      (cfg.supplyHours ? " + " + cfg.supplyHours + " ч на подачу машины" : "") + ".";
 
-    // Telegram умеет подставить текст в чат; MAX — нет, туда заявку вставляют из буфера
+    // Telegram подставляет текст в чат сам; в MAX заявку вставляют из буфера
     var tg = $("#sendTg");
     if (tg) tg.href = "https://t.me/" + cfg.telegram.replace(/^@/, "") + "?text=" + encodeURIComponent(buildMessage(res));
   }
 
   function renderSendButtons() {
-    var html = "";
-    if (cfg.telegram) html += '<a class="btn btn--primary btn--tg" id="sendTg" target="_blank" rel="noopener">Отправить в Telegram</a>';
-    if (cfg.max) html += '<a class="btn btn--primary btn--max" id="sendMax" href="' + esc(cfg.max) + '" target="_blank" rel="noopener">Написать в MAX</a>';
+    var html = "", primaryUsed = false;
+    function cls() { var c = primaryUsed ? "btn--dark" : "btn--primary"; primaryUsed = true; return c; }
+    if (cfg.telegram) html += '<a class="btn btn--block ' + cls() + '" id="sendTg" href="https://t.me/' + esc(cfg.telegram.replace(/^@/, "")) + '" target="_blank" rel="noopener">Отправить в Telegram</a>';
+    if (cfg.max) html += '<a class="btn btn--block ' + cls() + '" id="sendMax" href="' + esc(cfg.max) + '" target="_blank" rel="noopener">Написать в MAX</a>';
     if (!html) html = '<p class="demo-note">Демо-версия: заявки пока никуда не отправляются. Подключим ваш Telegram или MAX за пару минут.</p>';
-    if (cfg.phone) html += '<a class="btn btn--ghost" href="tel:' + esc(cfg.phone.replace(/[^\d+]/g, "")) + '">Позвонить</a>';
+    if (cfg.phone) html += '<a class="btn btn--block btn--ghost" href="' + esc(telHref(cfg.phone)) + '">Позвонить</a>';
     $("#sendButtons").innerHTML = html;
   }
 
+  // ---------- проверка формы ----------
+  var REQUIRED = [
+    ["from", "откуда", "Укажите адрес погрузки"],
+    ["to", "куда", "Укажите адрес выгрузки"],
+    ["date", "дату", "Выберите дату"],
+    ["clientPhone", "телефон", "Укажите телефон"],
+  ];
+
+  function setFieldError(name, msg) {
+    var box = form.querySelector('[data-field="' + name + '"]');
+    var input = form.elements[name];
+    if (!box) return;
+    var errId = "err-" + name;
+    var err = document.getElementById(errId);
+    if (msg) {
+      box.classList.remove("is-invalid");
+      void box.offsetWidth; // перезапуск анимации
+      box.classList.add("is-invalid");
+      if (!err) {
+        err = document.createElement("small");
+        err.className = "field__err";
+        err.id = errId;
+        box.appendChild(err);
+      }
+      err.textContent = msg;
+      input.setAttribute("aria-invalid", "true");
+      input.setAttribute("aria-describedby", errId);
+    } else {
+      box.classList.remove("is-invalid");
+      if (err) err.remove();
+      input.removeAttribute("aria-invalid");
+      input.removeAttribute("aria-describedby");
+    }
+  }
+
+  function todayIso() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  function fieldProblem(name) {
+    var v = val(name);
+    var rule = REQUIRED.filter(function (r) { return r[0] === name; })[0];
+    if (!v) return rule[2];
+    if (name === "date" && v < todayIso()) return "Эта дата уже прошла";
+    if (name === "clientPhone" && v.replace(/\D/g, "").length < 11) return "Введите номер полностью";
+    return "";
+  }
+
   function validate() {
-    var missing = [];
-    var checks = [["from", "откуда"], ["to", "куда"], ["date", "дату"], ["clientPhone", "телефон"]];
-    $all(".field--bad").forEach(function (el) { el.classList.remove("field--bad"); });
-    checks.forEach(function (c) {
-      if (!val(c[0])) {
-        missing.push(c[1]);
-        form.elements[c[0]].closest(".field").classList.add("field--bad");
+    var missing = [], first = null;
+    REQUIRED.forEach(function (r) {
+      var problem = fieldProblem(r[0]);
+      setFieldError(r[0], problem);
+      if (problem) {
+        missing.push(r[1]);
+        if (!first) first = form.elements[r[0]];
       }
     });
-    var phoneDigits = val("clientPhone").replace(/\D/g, "");
-    if (val("clientPhone") && phoneDigits.length < 10) {
-      missing.push("телефон полностью");
-      form.elements.clientPhone.closest(".field").classList.add("field--bad");
-    }
     if (!state.vehicle) missing.push("машину");
     var err = $("#formError");
     if (missing.length) {
-      err.textContent = "Укажите: " + missing.join(", ") + ".";
+      err.textContent = "Заполните: " + missing.join(", ") + ".";
       err.hidden = false;
-      var bad = $(".field--bad input");
-      if (bad) bad.focus();
+      if (first) {
+        first.focus({ preventScroll: true });
+        first.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "center" });
+      }
       return false;
     }
     err.hidden = true;
     return true;
   }
 
-  // ---------- events ----------
+  // ---------- маска телефона ----------
+  function formatPhone(raw) {
+    var d = raw.replace(/\D/g, "");
+    if (!d) return "";
+    if (d[0] === "8") d = "7" + d.slice(1);
+    else if (d[0] !== "7") d = "7" + d;
+    d = d.slice(0, 11);
+    var out = "+7";
+    if (d.length > 1) out += " (" + d.slice(1, 4);
+    if (d.length > 4) out += ") " + d.slice(4, 7);
+    if (d.length > 7) out += "-" + d.slice(7, 9);
+    if (d.length > 9) out += "-" + d.slice(9, 11);
+    return out;
+  }
+
+  function wirePhoneMask() {
+    var input = form.elements.clientPhone;
+    input.addEventListener("input", function () {
+      var raw = input.value;
+      var pos = input.selectionStart;
+      var atEnd = pos === raw.length;
+      var digitsBefore = raw.slice(0, pos).replace(/\D/g, "").length;
+      var formatted = formatPhone(raw);
+      if (formatted === raw) return;
+      input.value = formatted;
+      if (atEnd || document.activeElement !== input) return;
+      var i = 0, seen = 0;
+      while (i < formatted.length && seen < digitsBefore) { if (/\d/.test(formatted[i])) seen++; i++; }
+      input.setSelectionRange(i, i);
+    });
+  }
+
+  // ---------- копирование ----------
+  function copyRequest(message) {
+    var text = buildMessage(calc());
+    var manual = $("#manualCopy");
+    manual.hidden = true;
+    function done() { toast(message); }
+    function showManual() {
+      $("#manualCopyText").value = text;
+      manual.hidden = false;
+      $("#manualCopyText").focus();
+      $("#manualCopyText").select();
+      toast("Не удалось скопировать автоматически — скопируйте текст вручную");
+    }
+    function legacyCopy() {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px;";
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (_) { ok = false; }
+      ta.remove();
+      if (ok) done(); else showManual();
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, legacyCopy);
+    } else {
+      legacyCopy();
+    }
+  }
+
+  // ---------- события ----------
   function wire() {
-    form.addEventListener("input", update);
+    form.addEventListener("input", function (e) {
+      var name = e.target.name;
+      if (form.querySelector('[data-field="' + name + '"].is-invalid') && !fieldProblem(name)) setFieldError(name, "");
+      update();
+    });
     form.addEventListener("change", function (e) {
       if (e.target.name === "vehicle") {
         state.vehicle = cfg.vehicles.filter(function (v) { return v.id === e.target.value; })[0];
       }
+      if (e.target.name === "date" && form.querySelector('[data-field="date"].is-invalid')) setFieldError("date", fieldProblem("date"));
       update();
     });
     form.addEventListener("submit", function (e) { e.preventDefault(); });
+
+    // Числовые поля: без минуса, «e» и дробей; при уходе с поля — приводим к допустимому
+    $all("[data-num]").forEach(function (el) {
+      el.addEventListener("keydown", function (e) {
+        if (["e", "E", "+", "-", ".", ","].indexOf(e.key) >= 0) e.preventDefault();
+      });
+      el.addEventListener("blur", function () {
+        var fallback = el.min !== "" ? Number(el.min) : 0;
+        el.value = num(el.name, fallback);
+        update();
+      });
+    });
 
     $all("[data-stepper]").forEach(function (box) {
       var key = box.getAttribute("data-stepper");
       box.addEventListener("click", function (e) {
         var b = e.target.closest("[data-step]");
-        if (!b) return;
+        if (!b || b.disabled) return;
         var d = parseInt(b.getAttribute("data-step"), 10);
         if (key === "hours") state.hours = Math.min(cfg.maxHours, Math.max(cfg.minHours, state.hours + d));
         else state.movers = Math.min(cfg.maxMovers, Math.max(0, state.movers + d));
@@ -327,7 +517,6 @@
       var a = e.target.closest("#sendTg, #sendMax");
       if (!a) return;
       if (!validate()) { e.preventDefault(); return; }
-      // Копируем всегда: в MAX текст не подставляется, в Telegram — подстраховка
       copyRequest(a.id === "sendMax"
         ? "Заявка скопирована — вставьте её в чат MAX и отправьте"
         : "Заявка скопирована на случай, если текст не подставился в чат");
@@ -337,55 +526,73 @@
       if (validate()) copyRequest("Заявка скопирована — вставьте её в чат");
     });
 
-    function copyRequest(message) {
-      var text = buildMessage(calc());
-      var done = function () { toast(message); };
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(done, fallbackCopy);
-      } else fallbackCopy();
-      function fallbackCopy() {
-        var ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed"; ta.style.opacity = "0";
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand("copy"); done(); } catch (_) { toast("Не удалось скопировать"); }
-        ta.remove();
-      }
-    }
+    // Плавный скролл по якорям
+    $all("[data-scroll]").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        var target = document.querySelector(a.getAttribute("href"));
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: reduceMotion.matches ? "auto" : "smooth", block: "start" });
+        history.replaceState(null, "", a.getAttribute("href"));
+      });
+    });
 
-    // Нижняя плашка прячется, когда блок с расчётом на экране
+    wireBar();
+    wireReveal();
+    wirePhoneMask();
+  }
+
+  // Нижняя панель: прячется, когда итог на экране или открыта клавиатура
+  function wireBar() {
     var bar = $("#bar");
+    var flags = { summary: false, typing: false };
+    function sync() { bar.classList.toggle("bar--hidden", flags.summary || flags.typing); }
     if ("IntersectionObserver" in window) {
-      var hidden = { order: false, top: true };
-      var sync = function () { bar.classList.toggle("bar--hidden", hidden.order || hidden.top); };
       new IntersectionObserver(function (es) {
-        hidden.order = es[0].isIntersecting; sync();
-      }).observe($("#estimate"));
-      new IntersectionObserver(function (es) {
-        hidden.top = es[0].isIntersecting; sync();
-      }).observe($(".hero"));
+        flags.summary = es[0].isIntersecting; sync();
+      }, { rootMargin: "0px 0px -80px 0px" }).observe($("#estimate"));
     }
+    var typingInput = function (el) {
+      return el && el.matches && el.matches("input, textarea") && !el.matches('[type="checkbox"], [type="radio"]');
+    };
+    document.addEventListener("focusin", function (e) {
+      if (isMobile.matches && typingInput(e.target)) { flags.typing = true; sync(); }
+    });
+    document.addEventListener("focusout", function () {
+      setTimeout(function () { flags.typing = typingInput(document.activeElement) && isMobile.matches; sync(); }, 50);
+    });
+  }
+
+  function wireReveal() {
+    var items = $all("[data-reveal]");
+    if (!("IntersectionObserver" in window)) {
+      items.forEach(function (el) { el.classList.add("is-in"); });
+      return;
+    }
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); }
+      });
+    }, { rootMargin: "0px 0px -6% 0px", threshold: 0.08 });
+    items.forEach(function (el) { io.observe(el); });
   }
 
   function initDate() {
     var d = new Date();
-    var iso = function (x) {
-      return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0");
-    };
-    form.elements.date.min = iso(d);
     d.setDate(d.getDate() + 1);
-    form.elements.date.value = iso(d);
+    form.elements.date.min = todayIso();
+    form.elements.date.value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   }
 
   function render() {
     state.hours = Math.min(cfg.maxHours, Math.max(cfg.minHours, state.hours));
-    state.movers = Math.min(cfg.maxMovers, state.movers);
-    renderFleet();
+    state.movers = Math.min(cfg.maxMovers, Math.max(0, state.movers));
+    renderHero();
+    renderOptions();
     update();
   }
 
-  // ---------- start ----------
+  // ---------- старт ----------
   function start() {
     cfg = window.SITE_CONFIG;
     state.hours = cfg.minHours;
