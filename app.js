@@ -159,6 +159,20 @@
     $("#estimateNote").textContent = "Оплата — по фактическому времени. Точную сумму " +
       (cfg.ownerName || "исполнитель") + " подтвердит после проверки адресов.";
 
+    var pin = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
+    if (cfg.location) {
+      $("#location").hidden = false;
+      $("#location").innerHTML = pin + "<span>" + esc(cfg.location) + "</span>";
+    }
+    if (cfg.ownerName) {
+      $("#seller").hidden = false;
+      $("#sellerAva").textContent = cfg.ownerName.charAt(0);
+      $("#sellerName").textContent = cfg.ownerName;
+      $("#sellerNote").textContent = cfg.sellerNote || "";
+      $("#sellerNote").hidden = !cfg.sellerNote;
+    }
+    $("#descTitle").hidden = !cfg.tagline;
+
     var areas = cfg.areas ? "Выезд: " + cfg.areas : "";
     $("#areas").textContent = areas;
     $("#areas").hidden = !areas;
@@ -175,10 +189,26 @@
     }
   }
 
+  // Фото для галереи: gallery → heroPhoto → фото машин
+  function galleryPhotos() {
+    if (cfg.gallery && cfg.gallery.length) return cfg.gallery;
+    if (cfg.heroPhoto) return [{ src: cfg.heroPhoto, alt: cfg.heroPhotoAlt || cfg.name }];
+    return cfg.vehicles.filter(function (v) { return v.photo; }).map(function (v) { return { src: v.photo, alt: v.title }; });
+  }
+
   function renderHero() {
-    $("#heroPrice").textContent = rub(minPrice());
-    $("#heroMin").textContent = "минимум " + cfg.minHours + " " + plural(cfg.minHours, "час", "часа", "часов") +
-      (cfg.supplyHours ? " + " + cfg.supplyHours + " ч подача" : "");
+    var hourPrice = minPrice();
+    var hoursText = cfg.minHours + " " + plural(cfg.minHours, "час", "часа", "часов");
+    if (cfg.heroPriceMode === "order") {
+      // «от 8 000 ₽» — минимальный заказ, как в объявлении
+      $("#heroPrice").textContent = "от " + rub(hourPrice * (cfg.minHours + (cfg.supplyHours || 0)));
+      $("#heroPriceUnit").textContent = "";
+      $("#heroMin").textContent = rub(hourPrice) + " / час · минимум " + hoursText + (cfg.supplyHours ? " + " + cfg.supplyHours + " ч подача" : "");
+    } else {
+      $("#heroPrice").textContent = rub(hourPrice);
+      $("#heroPriceUnit").textContent = "/ час";
+      $("#heroMin").textContent = "минимум " + hoursText + (cfg.supplyHours ? " + " + cfg.supplyHours + " ч подача" : "");
+    }
 
     var rows = (cfg.facts || []).slice();
     if (cfg.maxMovers) rows.push(["Грузчик", rub(cfg.moverPrice) + " / час"]);
@@ -187,15 +217,67 @@
       return "<div><dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>";
     }).join("");
 
-    var withPhoto = cfg.vehicles.filter(function (v) { return v.photo; })[0];
-    var photo = cfg.heroPhoto || (withPhoto && withPhoto.photo);
-    $("#heroMedia").hidden = !photo;
-    $("#hero").classList.toggle("hero--nophoto", !photo);
-    if (photo) {
-      var img = $("#heroImg");
-      if (img.getAttribute("src") !== photo) img.src = photo;
-      img.alt = cfg.heroPhotoAlt || (withPhoto ? withPhoto.title : cfg.name);
+    var photos = galleryPhotos();
+    $("#hero").classList.toggle("hero--nophoto", !photos.length);
+    renderGallery(photos);
+  }
+
+  // ---------- галерея ----------
+  var galleryIndex = 0;
+  function renderGallery(photos) {
+    var box = $("#gallery"), track = $("#galleryTrack"), thumbs = $("#galleryThumbs");
+    box.hidden = !photos.length;
+    if (!photos.length) return;
+    var key = photos.map(function (p) { return p.src; }).join("|");
+    if (track._key === key) return; // повторный render после загрузки таблицы
+    track._key = key;
+    box.classList.toggle("gallery--multi", photos.length > 1);
+    track.innerHTML = photos.map(function (p, i) {
+      return '<figure class="gallery__slide" aria-label="Фото ' + (i + 1) + " из " + photos.length + '">' +
+        '<img src="' + esc(p.src) + '" alt="' + esc(p.alt || cfg.name) + '"' + (i ? ' loading="lazy"' : ' fetchpriority="high"') + ' decoding="async"></figure>';
+    }).join("");
+    thumbs.hidden = photos.length < 2;
+    thumbs.innerHTML = photos.length < 2 ? "" : photos.map(function (p, i) {
+      return '<button type="button" class="gallery__thumb" data-i="' + i + '" aria-label="Показать фото ' + (i + 1) + '"><img src="' + esc(p.src) + '" alt="" loading="lazy"></button>';
+    }).join("");
+    galleryIndex = 0;
+    syncGallery(photos.length);
+  }
+
+  function syncGallery(count) {
+    $("#galleryCount").textContent = count > 1 ? (galleryIndex + 1) + " / " + count : "";
+    $("#galleryCount").hidden = count < 2;
+    $("#galleryPrev").disabled = galleryIndex <= 0;
+    $("#galleryNext").disabled = galleryIndex >= count - 1;
+    $all(".gallery__thumb").forEach(function (t, i) { t.setAttribute("aria-current", i === galleryIndex ? "true" : "false"); });
+  }
+
+  function wireGallery() {
+    var track = $("#galleryTrack");
+    function count() { return track.children.length; }
+    function go(i) {
+      i = Math.max(0, Math.min(count() - 1, i));
+      track.scrollTo({ left: i * track.clientWidth, behavior: reduceMotion.matches ? "auto" : "smooth" });
     }
+    var raf;
+    track.addEventListener("scroll", function () {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(function () {
+        var i = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+        if (i !== galleryIndex) { galleryIndex = i; syncGallery(count()); }
+      });
+    }, { passive: true });
+    $("#galleryPrev").addEventListener("click", function () { go(galleryIndex - 1); });
+    $("#galleryNext").addEventListener("click", function () { go(galleryIndex + 1); });
+    $("#galleryThumbs").addEventListener("click", function (e) {
+      var t = e.target.closest(".gallery__thumb");
+      if (t) go(parseInt(t.getAttribute("data-i"), 10));
+    });
+    track.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(galleryIndex - 1); }
+      if (e.key === "ArrowRight") { e.preventDefault(); go(galleryIndex + 1); }
+    });
+    window.addEventListener("resize", function () { track.scrollLeft = galleryIndex * track.clientWidth; });
   }
 
   function renderReviews() {
@@ -575,6 +657,7 @@
     wireBar();
     wireReveal();
     wirePhoneMask();
+    wireGallery();
   }
 
   // Нижняя панель: прячется, когда итог на экране или открыта клавиатура
