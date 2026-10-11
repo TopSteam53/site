@@ -1,159 +1,187 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" class="no-js">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Грузоперевозки на Газели</title>
-  <meta name="description" content="Расчёт стоимости переезда и заказ Газели с грузчиками онлайн">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e8590c'/%3E%3Cpath d='M12 22h24v18H12zM36 28h9l7 7v5H36z' fill='white'/%3E%3Ccircle cx='21' cy='42' r='5' fill='white' stroke='%23e8590c' stroke-width='3'/%3E%3Ccircle cx='45' cy='42' r='5' fill='white' stroke='%23e8590c' stroke-width='3'/%3E%3C/svg%3E">
+  <title>Газель с грузчиками — расчёт стоимости онлайн</title>
+  <meta name="description" content="Грузоперевозки на Газели: тариф за час, минимальный заказ, расчёт стоимости переезда и заявка в Telegram или MAX за минуту.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Газель с грузчиками — расчёт стоимости онлайн">
+  <meta property="og:description" content="Тариф за час, минимальный заказ и заявка без звонков.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f4f3ef" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121314" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23c2410c'/%3E%3Cpath d='M10 20h26v20H10zM36 27h10l8 8v5H36z' fill='white'/%3E%3Ccircle cx='20' cy='43' r='5' fill='%23c2410c' stroke='white' stroke-width='3'/%3E%3Ccircle cx='46' cy='43' r='5' fill='%23c2410c' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.replace("no-js", "js");</script>
 </head>
 <body>
+  <a class="skip" href="#order">К расчёту стоимости</a>
+
   <header class="top">
     <div class="wrap top__in">
-      <div class="brand">
-        <span class="brand__logo" aria-hidden="true"></span>
+      <a class="brand" href="#top" aria-label="В начало страницы">
+        <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7"/><path d="M5 10h13v10H5zM18 13.5h5l4 4V20h-9z" fill="#fff"/><circle cx="10" cy="21.5" r="2.6" fill="#fff"/><circle cx="23" cy="21.5" r="2.6" fill="#fff"/></svg>
         <span class="brand__name" data-bind="name"></span>
-      </div>
-      <a class="top__phone" data-bind-href="tel" data-bind="phone"></a>
+      </a>
+      <a class="top__call" data-tel hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg>
+        <span class="top__num" data-bind="phone"></span>
+      </a>
     </div>
   </header>
 
-  <main>
+  <main id="top">
     <section class="hero">
-      <div class="wrap">
-        <p class="hero__city" data-bind="cityLine"></p>
-        <h1 class="hero__title">Переезд без лишних звонков: цена&nbsp;сразу, заявка за&nbsp;минуту</h1>
-        <p class="hero__sub" data-bind="tagline"></p>
-        <ul class="badges" id="badges"></ul>
-        <a href="#order" class="btn btn--primary btn--lg">Рассчитать стоимость</a>
+      <div class="wrap hero__grid">
+        <div class="hero__main" data-reveal>
+          <p class="eyebrow" data-bind="cityLine"></p>
+          <h1 class="hero__title" id="heroTitle"></h1>
+          <p class="hero__price"><span>от</span> <strong id="heroPrice"></strong> <span>/ час</span></p>
+          <p class="hero__sub" data-bind="tagline"></p>
+          <ul class="trust" id="trust"></ul>
+          <div class="hero__cta">
+            <a href="#order" class="btn btn--primary btn--lg" data-scroll>Рассчитать стоимость</a>
+            <a class="btn btn--ghost btn--lg" data-tel hidden>Позвонить</a>
+          </div>
+        </div>
+        <dl class="tariff" id="tariff" data-reveal aria-label="Тарифы"></dl>
       </div>
     </section>
 
-    <section class="section" id="fleet">
+    <section class="order-section" id="order" aria-labelledby="orderTitle">
       <div class="wrap">
-        <h2 class="section__title">Машины</h2>
-        <div class="fleet" id="fleetList"></div>
-      </div>
-    </section>
-
-    <section class="section section--alt">
-      <div class="wrap">
-        <h2 class="section__title">Как заказать</h2>
-        <ol class="steps">
-          <li><b>Выберите машину и время</b><span>Калькулятор сразу покажет примерную стоимость.</span></li>
-          <li><b>Отправьте заявку</b><span data-bind="sendHint"></span></li>
-          <li><b>Получите подтверждение</b><span data-bind="confirmHint"></span></li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="section" id="order">
-      <div class="wrap">
-        <h2 class="section__title">Расчёт и заявка</h2>
+        <h2 class="section-title" id="orderTitle" data-reveal>Расчёт и заявка</h2>
         <form class="order" id="orderForm" novalidate>
-          <fieldset class="card">
-            <legend>Машина</legend>
-            <div class="choice" id="vehicleChoice"></div>
-          </fieldset>
+          <div class="order__fields">
 
-          <fieldset class="card">
-            <legend>Адреса</legend>
-            <label class="field">
-              <span>Откуда <i>*</i></span>
-              <input name="from" type="text" placeholder="Улица, дом" autocomplete="street-address" required>
-            </label>
-            <div class="row">
-              <label class="field">
-                <span>Этаж</span>
-                <input name="floorFrom" type="number" inputmode="numeric" min="1" max="40" value="1">
-              </label>
-              <label class="check check--inline">
-                <input name="liftFrom" type="checkbox" checked><span>Есть грузовой лифт</span>
-              </label>
-            </div>
-            <label class="field">
-              <span>Куда <i>*</i></span>
-              <input name="to" type="text" placeholder="Улица, дом" required>
-            </label>
-            <div class="row">
-              <label class="field">
-                <span>Этаж</span>
-                <input name="floorTo" type="number" inputmode="numeric" min="1" max="40" value="1">
-              </label>
-              <label class="check check--inline">
-                <input name="liftTo" type="checkbox" checked><span>Есть грузовой лифт</span>
-              </label>
-            </div>
-            <label class="field">
-              <span data-bind="outsideLabel"></span>
-              <input name="outsideKm" type="number" inputmode="numeric" min="0" max="500" value="0">
-              <small>Если оба адреса в черте города — оставьте 0</small>
-            </label>
-          </fieldset>
+            <fieldset class="block" data-reveal>
+              <legend class="block__title"><span class="block__n">1</span>Машина</legend>
+              <div class="vehicles" id="vehicleChoice" role="radiogroup" aria-label="Выбор машины"></div>
+            </fieldset>
 
-          <fieldset class="card">
-            <legend>Время и грузчики</legend>
-            <div class="row">
-              <label class="field">
-                <span>Дата <i>*</i></span>
-                <input name="date" type="date" required>
-              </label>
-              <label class="field">
-                <span>Время подачи</span>
-                <input name="time" type="time" value="10:00" step="1800">
-              </label>
-            </div>
-            <div class="stepper" data-stepper="hours">
-              <span class="stepper__label">Часов работы</span>
-              <button type="button" class="stepper__btn" data-step="-1" aria-label="Меньше часов">−</button>
-              <output class="stepper__val" id="hoursVal"></output>
-              <button type="button" class="stepper__btn" data-step="1" aria-label="Больше часов">+</button>
-            </div>
-            <p class="hint" id="hoursHint"></p>
-            <div class="stepper" data-stepper="movers">
-              <span class="stepper__label">Грузчиков</span>
-              <button type="button" class="stepper__btn" data-step="-1" aria-label="Меньше грузчиков">−</button>
-              <output class="stepper__val" id="moversVal"></output>
-              <button type="button" class="stepper__btn" data-step="1" aria-label="Больше грузчиков">+</button>
-            </div>
-          </fieldset>
+            <fieldset class="block" data-reveal>
+              <legend class="block__title"><span class="block__n">2</span>Адреса</legend>
+              <div class="field" data-field="from">
+                <label for="from">Откуда <i aria-hidden="true">*</i></label>
+                <input id="from" name="from" type="text" placeholder="Улица, дом" autocomplete="street-address" required>
+              </div>
+              <div class="addr-extra">
+                <div class="field">
+                  <label for="floorFrom">Этаж</label>
+                  <input id="floorFrom" name="floorFrom" type="number" inputmode="numeric" min="1" max="40" value="1" data-num>
+                </div>
+                <label class="check">
+                  <input name="liftFrom" type="checkbox" checked>
+                  <span class="check__box" aria-hidden="true"></span>
+                  <span class="check__text">Есть грузовой лифт</span>
+                </label>
+              </div>
 
-          <fieldset class="card" id="extrasCard">
-            <legend>Дополнительно</legend>
-            <div class="field" id="cargoField" hidden>
-              <span>Что за груз</span>
-              <div class="chips" id="cargoList"></div>
-            </div>
-            <div id="extrasList"></div>
-            <label class="field">
-              <span>Что перевозим</span>
-              <textarea name="comment" rows="3" placeholder="Например: диван, холодильник, 15 коробок, стиральная машина"></textarea>
-            </label>
-          </fieldset>
+              <div class="field" data-field="to">
+                <label for="to">Куда <i aria-hidden="true">*</i></label>
+                <input id="to" name="to" type="text" placeholder="Улица, дом" autocomplete="off" required>
+              </div>
+              <div class="addr-extra">
+                <div class="field">
+                  <label for="floorTo">Этаж</label>
+                  <input id="floorTo" name="floorTo" type="number" inputmode="numeric" min="1" max="40" value="1" data-num>
+                </div>
+                <label class="check">
+                  <input name="liftTo" type="checkbox" checked>
+                  <span class="check__box" aria-hidden="true"></span>
+                  <span class="check__text">Есть грузовой лифт</span>
+                </label>
+              </div>
 
-          <fieldset class="card">
-            <legend>Контакты</legend>
-            <div class="row">
-              <label class="field">
-                <span>Имя</span>
-                <input name="clientName" type="text" autocomplete="given-name" placeholder="Как к вам обращаться">
-              </label>
-              <label class="field">
-                <span>Телефон <i>*</i></span>
-                <input name="clientPhone" type="tel" autocomplete="tel" placeholder="+7" required>
-              </label>
-            </div>
-          </fieldset>
+              <div class="field">
+                <label for="outsideKm" data-bind="outsideLabel"></label>
+                <input id="outsideKm" name="outsideKm" type="number" inputmode="numeric" min="0" max="500" value="0" data-num>
+                <small class="field__hint">Оба адреса в черте города — оставьте 0</small>
+              </div>
+            </fieldset>
 
-          <aside class="card estimate" id="estimate" aria-live="polite">
-            <h3 class="estimate__title">Предварительная стоимость</h3>
-            <ul class="estimate__lines" id="estimateLines"></ul>
-            <p class="estimate__total"><span>Примерно</span><strong id="estimateTotal"></strong></p>
-            <p class="estimate__note">Это ориентир, а не итоговая цена: оплата — по фактическому времени работы. Точную сумму подтвердит исполнитель.</p>
-            <p class="form-error" id="formError" role="alert" hidden></p>
-            <div class="send" id="sendButtons"></div>
-            <button type="button" class="btn btn--ghost" id="copyBtn">Скопировать заявку</button>
+            <fieldset class="block" data-reveal>
+              <legend class="block__title"><span class="block__n">3</span>Время и грузчики</legend>
+              <div class="pair">
+                <div class="field" data-field="date">
+                  <label for="date">Дата <i aria-hidden="true">*</i></label>
+                  <input id="date" name="date" type="date" required>
+                </div>
+                <div class="field">
+                  <label for="time">Время подачи</label>
+                  <input id="time" name="time" type="time" value="10:00" step="1800">
+                </div>
+              </div>
+
+              <div class="stepper" data-stepper="hours">
+                <span class="stepper__label" id="hoursLabel">Часов работы</span>
+                <div class="stepper__ctrl">
+                  <button type="button" class="stepper__btn" data-step="-1" aria-label="Меньше часов">−</button>
+                  <output class="stepper__val" id="hoursVal" aria-labelledby="hoursLabel" aria-live="polite"></output>
+                  <button type="button" class="stepper__btn" data-step="1" aria-label="Больше часов">+</button>
+                </div>
+              </div>
+              <p class="field__hint" id="hoursHint"></p>
+
+              <div class="stepper" data-stepper="movers">
+                <span class="stepper__label" id="moversLabel">Грузчиков <small id="moverRate"></small></span>
+                <div class="stepper__ctrl">
+                  <button type="button" class="stepper__btn" data-step="-1" aria-label="Меньше грузчиков">−</button>
+                  <output class="stepper__val" id="moversVal" aria-labelledby="moversLabel" aria-live="polite"></output>
+                  <button type="button" class="stepper__btn" data-step="1" aria-label="Больше грузчиков">+</button>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="block" data-reveal>
+              <legend class="block__title"><span class="block__n">4</span>Груз</legend>
+              <div class="field" id="cargoField" hidden>
+                <span class="field__label">Что за груз</span>
+                <div class="chips" id="cargoList"></div>
+              </div>
+              <div class="extras" id="extrasList"></div>
+              <div class="field">
+                <label for="comment">Что перевозим</label>
+                <textarea id="comment" name="comment" rows="3" placeholder="Например: диван, холодильник, 15 коробок"></textarea>
+              </div>
+            </fieldset>
+
+            <fieldset class="block" data-reveal>
+              <legend class="block__title"><span class="block__n">5</span>Контакты</legend>
+              <div class="pair pair--wide">
+                <div class="field">
+                  <label for="clientName">Имя</label>
+                  <input id="clientName" name="clientName" type="text" autocomplete="given-name" placeholder="Как к вам обращаться">
+                </div>
+                <div class="field" data-field="clientPhone">
+                  <label for="clientPhone">Телефон <i aria-hidden="true">*</i></label>
+                  <input id="clientPhone" name="clientPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (999) 123-45-67" maxlength="18" required>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+
+          <aside class="summary" id="estimate" aria-labelledby="estimateTitle">
+            <div class="summary__in">
+              <h2 class="summary__title" id="estimateTitle">Предварительная стоимость</h2>
+              <ul class="summary__lines" id="estimateLines"></ul>
+              <p class="summary__total">
+                <span>Примерно</span>
+                <strong id="estimateTotal" aria-live="polite"></strong>
+              </p>
+              <p class="summary__note" id="estimateNote"></p>
+              <div class="form-error" id="formError" role="alert" hidden></div>
+              <div class="send" id="sendButtons"></div>
+              <button type="button" class="btn btn--ghost btn--block" id="copyBtn">Скопировать заявку</button>
+              <div class="manual-copy" id="manualCopy" hidden>
+                <label for="manualCopyText">Скопируйте текст заявки вручную</label>
+                <textarea id="manualCopyText" rows="8" readonly></textarea>
+              </div>
+            </div>
           </aside>
         </form>
       </div>
@@ -161,18 +189,22 @@
   </main>
 
   <footer class="foot">
-    <div class="wrap">
-      <p><b data-bind="name"></b> · <span data-bind="city"></span></p>
-      <p><a data-bind-href="tel" data-bind="phone"></a></p>
+    <div class="wrap foot__in">
+      <p><strong data-bind="name"></strong> · <span data-bind="city"></span></p>
+      <p><a class="foot__tel" data-tel hidden><span data-bind="phone"></span></a></p>
+      <p class="foot__note">Цены на сайте предварительные. Итог — по фактическому времени работы.</p>
     </div>
   </footer>
 
   <div class="bar" id="bar">
-    <div class="bar__sum"><small>Примерно</small><strong id="barTotal"></strong></div>
-    <a href="#estimate" class="btn btn--primary">Оформить</a>
+    <div class="bar__sum">
+      <small>Примерно</small>
+      <strong id="barTotal"></strong>
+    </div>
+    <a href="#estimate" class="btn btn--primary" data-scroll>Оформить</a>
   </div>
 
-  <div class="toast" id="toast" role="status" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="config.js"></script>
   <script src="app.js"></script>
