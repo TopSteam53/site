@@ -9,32 +9,81 @@
   <meta property="og:title" content="Грузоперевозки на Газели — расчёт стоимости">
   <meta property="og:description" content="Тариф за час, минимальный заказ и заявка без звонков.">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0f0f10" media="(prefers-color-scheme: dark)">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%23ffd000'/%3E%3Cpath d='M9 19h28v21H9zM37 26h10l8 8v6H37z' fill='%23111214'/%3E%3Ccircle cx='20' cy='44' r='5' fill='%23111214'/%3E%3Ccircle cx='46' cy='44' r='5' fill='%23111214'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#f5f4f0" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121311" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f201d'/%3E%3Cpath d='M9 19h28v21H9zM37 26h10l8 8v6H37z' fill='%23fff'/%3E%3Ccircle cx='20' cy='44' r='5' fill='%23c2462a'/%3E%3Ccircle cx='46' cy='44' r='5' fill='%23c2462a'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@600;700;800&family=Fira+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="styles.css">
   <script>document.documentElement.classList.replace("no-js", "js");</script>
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11.5A7 7 0 0 0 5 9.5C5 14.7 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-road" viewBox="0 0 24 24"><path d="M7 3 3 21M17 3l4 18M12 4v3M12 10.5v3M12 17v3"/></symbol>
+    <symbol id="i-floor" viewBox="0 0 24 24"><path d="M4 20h5v-5h5v-5h5V5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8.5 9h7M8.5 12.5h7M8.5 16h4"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 2.5 2.5 7z"/><path d="M10 13l5-5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7h7M8.5 11h1M12 11h0M15.5 11h0M8.5 14.5h1M12 14.5h0M15.5 14.5h0M8.5 18h1M12 18h3.5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  </svg>
+
   <a class="skip" href="#order">К расчёту стоимости</a>
 
   <header class="top">
     <div class="wrap top__in">
-      <a class="brand" href="#top" data-bind="name"></a>
-      <a class="top__call" data-tel hidden>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg>
-        <span class="top__num" data-bind="phone"></span>
+      <a class="brand" href="#top">
+        <span class="brand__mark" aria-hidden="true"><svg><use href="#i-truck"/></svg></span>
+        <span class="brand__text">
+          <span class="brand__name" data-bind="name"></span>
+          <span class="brand__sub" data-bind="brandSub"></span>
+        </span>
       </a>
+      <div class="top__right">
+        <a class="top__rating" id="topRating" hidden></a>
+        <a class="top__call" data-tel hidden>
+          <svg aria-hidden="true"><use href="#i-phone"/></svg>
+          <span class="top__num" data-bind="phone"></span>
+        </a>
+      </div>
     </div>
   </header>
 
   <main id="top">
-    <section class="hero hero--nophoto" id="hero">
-      <div class="hero__in">
-        <div class="gallery" id="gallery" hidden>
+    <!-- Первый экран -->
+    <section class="hero" id="hero">
+      <div class="wrap hero__grid">
+        <div class="hero__text" data-reveal>
+          <p class="eyebrow" data-bind="heroEyebrow"></p>
+          <h1 class="hero__title" id="heroTitle"></h1>
+          <p class="hero__sub" data-bind="tagline"></p>
+
+          <div class="hero__price">
+            <strong id="heroPrice"></strong>
+            <span id="heroPriceUnit"></span>
+            <small id="heroMin"></small>
+          </div>
+
+          <ul class="perks" id="perks" hidden></ul>
+
+          <div class="hero__cta">
+            <a href="#order" class="btn btn--accent btn--lg" data-scroll>Рассчитать стоимость <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="btn btn--ghost btn--lg" data-tel hidden><svg aria-hidden="true"><use href="#i-phone"/></svg> Позвонить</a>
+          </div>
+
+          <a class="rating" id="rating" hidden></a>
+        </div>
+
+        <div class="gallery card" id="gallery" data-reveal hidden>
           <div class="gallery__frame">
             <div class="gallery__track" id="galleryTrack" tabindex="0" role="region" aria-roledescription="галерея" aria-label="Фотографии машины"></div>
             <span class="gallery__count" id="galleryCount" aria-hidden="true"></span>
@@ -45,187 +94,275 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
             </button>
           </div>
-          <div class="gallery__thumbs" id="galleryThumbs"></div>
-        </div>
-
-        <div class="hero__body" data-reveal>
-          <h1 class="hero__title" id="heroTitle"></h1>
-          <a class="rating" id="rating" hidden></a>
-
-          <div class="price">
-            <p class="price__main"><strong id="heroPrice"></strong><span id="heroPriceUnit"></span></p>
-            <p class="price__min" id="heroMin"></p>
-          </div>
-          <p class="loc" id="location" hidden></p>
-
-          <div class="hero__cta">
-            <a href="#order" class="btn btn--accent btn--lg" data-scroll>Рассчитать и заказать</a>
-            <a class="btn btn--outline btn--lg" data-tel hidden>Позвонить</a>
-          </div>
-
-          <div class="seller" id="seller" hidden>
-            <span class="seller__ava" id="sellerAva" aria-hidden="true"></span>
-            <div class="seller__info">
-              <p class="seller__name" id="sellerName"></p>
-              <p class="seller__note" id="sellerNote"></p>
+          <div class="gallery__foot">
+            <div class="gallery__thumbs" id="galleryThumbs"></div>
+            <div class="seller" id="seller" hidden>
+              <span class="seller__ava" id="sellerAva" aria-hidden="true"></span>
+              <span class="seller__info">
+                <span class="seller__name" id="sellerName"></span>
+                <span class="seller__note" id="sellerNote"></span>
+              </span>
             </div>
           </div>
-
-          <h2 class="card-sub">Характеристики</h2>
-          <dl class="facts" id="facts"></dl>
-
-          <h2 class="card-sub" id="descTitle">Описание</h2>
-          <p class="desc" data-bind="tagline"></p>
-          <p class="areas" id="areas" hidden></p>
         </div>
       </div>
     </section>
 
-    <section class="reviews" id="reviews" aria-labelledby="reviewsTitle" hidden>
+    <!-- Парк -->
+    <section class="section" id="fleet" aria-labelledby="fleetTitle">
       <div class="wrap">
         <div class="sec-head" data-reveal>
-          <h2 class="sec-title" id="reviewsTitle">Отзывы</h2>
-          <a class="sec-link" id="reviewsLink" target="_blank" rel="noopener" hidden>Все отзывы на Авито</a>
+          <div>
+            <p class="eyebrow">Наш парк</p>
+            <h2 class="sec-title" id="fleetTitle">Выберите машину под задачу</h2>
+          </div>
+          <p class="sec-aside" id="fleetAside"></p>
+        </div>
+        <div class="fleet" id="vehicleChoice" role="radiogroup" aria-label="Выбор машины"></div>
+      </div>
+    </section>
+
+    <!-- Кузов и условия -->
+    <section class="section" id="specs" aria-labelledby="specsTitle">
+      <div class="wrap">
+        <div class="sec-head" data-reveal>
+          <div>
+            <p class="eyebrow">Кузов и условия</p>
+            <h2 class="sec-title" id="specsTitle">Что влезет и сколько стоит</h2>
+          </div>
+        </div>
+        <div class="specs">
+          <div class="card body-card" id="bodyCard" data-reveal hidden>
+            <svg class="body-svg" id="bodySvg" viewBox="0 0 360 178" role="img" aria-labelledby="bodySvgTitle">
+              <title id="bodySvgTitle">Размеры кузова</title>
+              <g class="body-svg__truck">
+                <rect x="40" y="22" width="222" height="104" rx="3"/>
+                <path d="M262 56h38l26 30v40h-64z"/>
+                <path class="body-svg__win" d="M270 64h26l18 22h-44z"/>
+                <circle cx="88" cy="132" r="13"/>
+                <circle cx="296" cy="132" r="13"/>
+              </g>
+              <g class="body-svg__dim">
+                <path d="M40 160h222M40 154v12M262 154v12"/>
+                <path d="M22 22v104M16 22h12M16 126h12"/>
+              </g>
+              <text class="body-svg__label" x="151" y="176" text-anchor="middle" id="bodyLen"></text>
+              <text class="body-svg__label" x="8" y="74" text-anchor="middle" transform="rotate(-90 8 74)" id="bodyHeight"></text>
+              <text class="body-svg__label body-svg__label--in" x="151" y="80" text-anchor="middle" id="bodyWidth"></text>
+            </svg>
+            <div class="fits" id="fitsBox" hidden>
+              <p class="fits__title">Поместится</p>
+              <ul class="fits__list" id="fits"></ul>
+            </div>
+          </div>
+
+          <div class="card spec-card" data-reveal>
+            <dl class="facts" id="facts"></dl>
+            <p class="areas" id="areas" hidden></p>
+            <p class="desc" data-bind="tagline"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Отзывы -->
+    <section class="section" id="reviews" aria-labelledby="reviewsTitle" hidden>
+      <div class="wrap">
+        <div class="sec-head" data-reveal>
+          <div>
+            <p class="eyebrow">Отзывы</p>
+            <h2 class="sec-title" id="reviewsTitle">Что пишут клиенты</h2>
+          </div>
+          <a class="sec-link" id="reviewsLink" target="_blank" rel="noopener" hidden>Все отзывы на Авито →</a>
         </div>
         <ul class="reviews__list" id="reviewsList"></ul>
       </div>
     </section>
 
-    <section class="order-section" id="order" aria-labelledby="orderTitle">
+    <!-- Калькулятор -->
+    <section class="section" id="order" aria-labelledby="orderTitle">
       <div class="wrap">
-        <div class="sec-head sec-head--stack" data-reveal>
-          <h2 class="sec-title" id="orderTitle">Расчёт стоимости</h2>
-          <p class="sec-sub">Цена считается сразу. Готовая заявка уходит в мессенджер — звонить не обязательно.</p>
+        <div class="sec-head" data-reveal>
+          <div>
+            <p class="eyebrow">Расчёт перевозки</p>
+            <h2 class="sec-title" id="orderTitle">Укажите детали работы</h2>
+            <p class="sec-sub">Заполните параметры — сумма пересчитается автоматически.</p>
+          </div>
         </div>
 
         <form class="order" id="orderForm" novalidate>
-          <div class="order__fields">
-
-            <fieldset class="group" data-reveal>
-              <legend class="group__title">Машина</legend>
-              <div class="vehicles" id="vehicleChoice" role="radiogroup" aria-label="Выбор машины"></div>
-            </fieldset>
-
-            <fieldset class="group" data-reveal>
-              <legend class="group__title">Адреса</legend>
-              <div class="field" data-field="from">
-                <label for="from">Откуда <i aria-hidden="true">*</i></label>
-                <input id="from" name="from" type="text" placeholder="Улица, дом" autocomplete="street-address" required>
+          <div class="card order__fields" data-reveal>
+            <div class="grid2">
+              <div class="field field--full">
+                <label for="vehicleSelect">Выбранная машина</label>
+                <div class="control">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-truck"/></svg>
+                  <select id="vehicleSelect" name="vehicleSelect"></select>
+                </div>
               </div>
-              <div class="addr-extra">
-                <div class="field">
-                  <label for="floorFrom">Этаж</label>
+
+              <div class="field field--full" data-field="from">
+                <label for="from">Откуда <i aria-hidden="true">*</i></label>
+                <div class="control">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                  <input id="from" name="from" type="text" placeholder="Улица, дом" autocomplete="street-address" required>
+                </div>
+              </div>
+              <div class="field">
+                <label for="floorFrom">Этаж погрузки</label>
+                <div class="control">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-floor"/></svg>
                   <input id="floorFrom" name="floorFrom" type="number" inputmode="numeric" min="1" max="40" value="1" data-num>
                 </div>
-                <label class="check">
-                  <input name="liftFrom" type="checkbox" checked>
-                  <span class="check__box" aria-hidden="true"></span>
-                  <span class="check__text">Есть грузовой лифт</span>
-                </label>
               </div>
+              <label class="check check--field">
+                <input name="liftFrom" type="checkbox" checked>
+                <span class="check__box" aria-hidden="true"></span>
+                <span class="check__text">Есть грузовой лифт</span>
+              </label>
 
-              <div class="field" data-field="to">
+              <div class="field field--full" data-field="to">
                 <label for="to">Куда <i aria-hidden="true">*</i></label>
-                <input id="to" name="to" type="text" placeholder="Улица, дом" autocomplete="off" required>
+                <div class="control">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                  <input id="to" name="to" type="text" placeholder="Улица, дом" autocomplete="off" required>
+                </div>
               </div>
-              <div class="addr-extra">
-                <div class="field">
-                  <label for="floorTo">Этаж</label>
+              <div class="field">
+                <label for="floorTo">Этаж выгрузки</label>
+                <div class="control">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-floor"/></svg>
                   <input id="floorTo" name="floorTo" type="number" inputmode="numeric" min="1" max="40" value="1" data-num>
                 </div>
-                <label class="check">
-                  <input name="liftTo" type="checkbox" checked>
-                  <span class="check__box" aria-hidden="true"></span>
-                  <span class="check__text">Есть грузовой лифт</span>
-                </label>
               </div>
+              <label class="check check--field">
+                <input name="liftTo" type="checkbox" checked>
+                <span class="check__box" aria-hidden="true"></span>
+                <span class="check__text">Есть грузовой лифт</span>
+              </label>
 
-              <div class="field">
-                <label for="outsideKm" data-bind="outsideLabel"></label>
-                <input id="outsideKm" name="outsideKm" type="number" inputmode="numeric" min="0" max="500" value="0" data-num>
-                <small class="field__hint">Оба адреса в черте города — оставьте 0</small>
-              </div>
-            </fieldset>
-
-            <fieldset class="group" data-reveal>
-              <legend class="group__title">Время и грузчики</legend>
-              <div class="pair">
-                <div class="field" data-field="date">
-                  <label for="date">Дата <i aria-hidden="true">*</i></label>
+              <div class="field" data-field="date">
+                <label for="date">Дата <i aria-hidden="true">*</i></label>
+                <div class="control">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-cal"/></svg>
                   <input id="date" name="date" type="date" required>
                 </div>
-                <div class="field">
-                  <label for="time">Время подачи</label>
+              </div>
+              <div class="field">
+                <label for="time">Время подачи</label>
+                <div class="control">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-clock"/></svg>
                   <input id="time" name="time" type="time" value="10:00" step="1800">
                 </div>
               </div>
 
-              <div class="stepper" data-stepper="hours">
-                <span class="stepper__label" id="hoursLabel">Часов работы <small id="hoursHint"></small></span>
-                <div class="stepper__ctrl">
+              <div class="field">
+                <span class="field__label" id="hoursLabel">Количество часов</span>
+                <div class="stepper" data-stepper="hours">
                   <button type="button" class="stepper__btn" data-step="-1" aria-label="Меньше часов">−</button>
                   <output class="stepper__val" id="hoursVal" aria-labelledby="hoursLabel" aria-live="polite"></output>
                   <button type="button" class="stepper__btn" data-step="1" aria-label="Больше часов">+</button>
                 </div>
+                <small class="field__hint" id="hoursHint"></small>
               </div>
-
-              <div class="stepper" data-stepper="movers">
-                <span class="stepper__label" id="moversLabel">Грузчиков <small id="moverRate"></small></span>
-                <div class="stepper__ctrl">
+              <div class="field" id="moversField">
+                <span class="field__label" id="moversLabel">Грузчики</span>
+                <div class="stepper" data-stepper="movers">
                   <button type="button" class="stepper__btn" data-step="-1" aria-label="Меньше грузчиков">−</button>
                   <output class="stepper__val" id="moversVal" aria-labelledby="moversLabel" aria-live="polite"></output>
                   <button type="button" class="stepper__btn" data-step="1" aria-label="Больше грузчиков">+</button>
                 </div>
+                <small class="field__hint" id="moverRate"></small>
               </div>
-            </fieldset>
 
-            <fieldset class="group" data-reveal>
-              <legend class="group__title">Груз</legend>
-              <div class="field" id="cargoField" hidden>
+              <div class="field field--full">
+                <label for="outsideKm" data-bind="outsideLabel"></label>
+                <div class="control">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-road"/></svg>
+                  <input id="outsideKm" name="outsideKm" type="number" inputmode="numeric" min="0" max="500" value="0" data-num>
+                </div>
+                <small class="field__hint">Оба адреса в черте города — оставьте 0</small>
+              </div>
+
+              <div class="field field--full" id="cargoField" hidden>
                 <span class="field__label">Что везём</span>
                 <div class="chips" id="cargoList"></div>
               </div>
-              <div class="extras" id="extrasList"></div>
-              <div class="field">
-                <label for="comment">Подробности</label>
-                <textarea id="comment" name="comment" rows="3" placeholder="Например: диван, холодильник, 15 коробок"></textarea>
-              </div>
-            </fieldset>
+              <div class="extras field--full" id="extrasList"></div>
 
-            <fieldset class="group" data-reveal>
-              <legend class="group__title">Контакты</legend>
-              <div class="pair pair--wide">
-                <div class="field">
-                  <label for="clientName">Имя</label>
+              <div class="field field--full">
+                <label for="comment">Комментарий</label>
+                <div class="control control--area">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-note"/></svg>
+                  <textarea id="comment" name="comment" rows="2" placeholder="Например: диван, холодильник, 15 коробок"></textarea>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="clientName">Имя</label>
+                <div class="control">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-user"/></svg>
                   <input id="clientName" name="clientName" type="text" autocomplete="given-name" placeholder="Как к вам обращаться">
                 </div>
-                <div class="field" data-field="clientPhone">
-                  <label for="clientPhone">Телефон <i aria-hidden="true">*</i></label>
+              </div>
+              <div class="field" data-field="clientPhone">
+                <label for="clientPhone">Телефон <i aria-hidden="true">*</i></label>
+                <div class="control">
+                  <svg class="control__icon" aria-hidden="true"><use href="#i-phone"/></svg>
                   <input id="clientPhone" name="clientPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (999) 123-45-67" maxlength="18" required>
                 </div>
               </div>
-            </fieldset>
+            </div>
           </div>
 
           <aside class="summary" id="estimate" aria-labelledby="estimateTitle">
             <div class="summary__in">
-              <h2 class="summary__title" id="estimateTitle">Ваш расчёт</h2>
+              <div class="summary__head">
+                <span class="summary__icon" aria-hidden="true"><svg><use href="#i-calc"/></svg></span>
+                <div>
+                  <p class="summary__eyebrow">Расчёт заказа</p>
+                  <h2 class="summary__title" id="estimateTitle">Итоговая стоимость</h2>
+                </div>
+              </div>
               <ul class="summary__lines" id="estimateLines"></ul>
               <p class="summary__total">
-                <span>Примерно</span>
+                <span>Итого</span>
                 <strong id="estimateTotal" aria-live="polite"></strong>
               </p>
               <p class="summary__note" id="estimateNote"></p>
               <div class="form-error" id="formError" role="alert" hidden></div>
-              <div class="send" id="sendButtons"></div>
-              <button type="button" class="btn btn--outline btn--block" id="copyBtn">Скопировать заявку</button>
-              <div class="manual-copy" id="manualCopy" hidden>
-                <label for="manualCopyText">Скопируйте текст заявки вручную</label>
-                <textarea id="manualCopyText" rows="8" readonly></textarea>
-              </div>
+              <button type="button" class="btn btn--accent btn--block btn--lg" id="sendBtn">
+                <svg aria-hidden="true"><use href="#i-send"/></svg> <span id="sendBtnText">Отправить заявку</span> <svg aria-hidden="true"><use href="#i-arrow"/></svg>
+              </button>
             </div>
           </aside>
         </form>
+      </div>
+    </section>
+
+    <!-- Вопросы -->
+    <section class="section" id="faq" aria-labelledby="faqTitle">
+      <div class="wrap">
+        <div class="sec-head" data-reveal>
+          <div>
+            <p class="eyebrow">Вопросы</p>
+            <h2 class="sec-title" id="faqTitle">Частые вопросы</h2>
+          </div>
+        </div>
+        <div class="card faq" id="faqList" data-reveal></div>
+      </div>
+    </section>
+
+    <!-- Финальный призыв -->
+    <section class="section section--last">
+      <div class="wrap">
+        <div class="final" data-reveal>
+          <div>
+            <h2 class="final__title">Не уверены, что всё влезет?</h2>
+            <p class="final__sub" id="finalSub"></p>
+          </div>
+          <div class="final__btns" id="finalButtons"></div>
+        </div>
       </div>
     </section>
   </main>
@@ -241,10 +378,37 @@
 
   <div class="bar" id="bar">
     <div class="bar__sum">
-      <small>Примерно</small>
+      <small>Итого примерно</small>
       <strong id="barTotal"></strong>
     </div>
     <a href="#estimate" class="btn btn--accent" data-scroll>Оформить</a>
+  </div>
+
+  <!-- Предпросмотр заявки -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal__head">
+        <span class="modal__app" id="modalAppIcon" aria-hidden="true"><svg><use href="#i-send"/></svg></span>
+        <div class="modal__titles">
+          <p class="modal__title" id="modalTitle">Заявка</p>
+          <p class="modal__sub" id="modalSub"></p>
+        </div>
+        <button type="button" class="modal__close" data-close aria-label="Закрыть"><svg aria-hidden="true"><use href="#i-close"/></svg></button>
+      </div>
+      <div class="modal__chat">
+        <div class="bubble">
+          <pre class="bubble__text" id="modalText"></pre>
+          <span class="bubble__time">сейчас ✓✓</span>
+        </div>
+      </div>
+      <p class="modal__hint" id="modalHint"></p>
+      <div class="modal__actions" id="modalActions"></div>
+      <div class="manual-copy" id="manualCopy" hidden>
+        <label for="manualCopyText">Скопируйте текст вручную</label>
+        <textarea id="manualCopyText" rows="6" readonly></textarea>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Панель владельца</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f201d'/%3E%3Cpath d='M9 19h28v21H9zM37 26h10l8 8v6H37z' fill='%23fff'/%3E%3Ccircle cx='20' cy='44' r='5' fill='%23c2462a'/%3E%3Ccircle cx='46' cy='44' r='5' fill='%23c2462a'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.5h0"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+    <symbol id="i-ruble" viewBox="0 0 24 24"><path d="M8 20V4h5.5a4 4 0 0 1 0 8H6M6 16h8"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 2.5 2.5 7z"/><path d="M10 13l5-5"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  </svg>
+
+  <header class="top">
+    <div class="wrap top__in">
+      <a class="brand" id="clientLink">
+        <span class="brand__mark" aria-hidden="true"><svg><use href="#i-truck"/></svg></span>
+        <span class="brand__text">
+          <span class="brand__name" id="ownerBrand"></span>
+          <span class="brand__sub">Панель владельца</span>
+        </span>
+      </a>
+      <a class="btn btn--ghost admin__open" id="clientLink2"><svg aria-hidden="true"><use href="#i-back"/></svg> <span>Клиентская страница</span></a>
+    </div>
+  </header>
+
+  <main class="wrap admin__main">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Управление парком</p>
+        <h1 class="sec-title">Рабочий кабинет</h1>
+        <p class="sec-sub">Обновляйте стоимость, доступность машин и контакты для приёма заявок.</p>
+      </div>
+      <span class="admin__count" id="parkCount"></span>
+    </div>
+
+    <div class="admin__stats">
+      <div class="card stat"><span class="stat__icon stat__icon--free"><svg aria-hidden="true"><use href="#i-check"/></svg></span><div><b id="statFree">0</b><span>Свободны</span></div></div>
+      <div class="card stat"><span class="stat__icon stat__icon--busy"><svg aria-hidden="true"><use href="#i-clock"/></svg></span><div><b id="statBusy">0</b><span>Заняты</span></div></div>
+      <div class="card stat"><span class="stat__icon stat__icon--confirm"><svg aria-hidden="true"><use href="#i-alert"/></svg></span><div><b id="statConfirm">0</b><span>Нужно подтверждение</span></div></div>
+    </div>
+
+    <div class="sec-head admin__subhead">
+      <h2 class="admin__h2">Настройки машин</h2>
+      <span class="admin__note">Цены указаны в рублях</span>
+    </div>
+    <div class="admin__grid" id="ownerVehicles"></div>
+
+    <div class="sec-head admin__subhead">
+      <h2 class="admin__h2">Куда приходят заявки</h2>
+    </div>
+    <div class="card admin__contacts">
+      <div class="grid2">
+        <div class="field">
+          <label for="ownTelegram">Telegram (username без @)</label>
+          <div class="control">
+            <svg class="control__icon" aria-hidden="true"><use href="#i-send"/></svg>
+            <input id="ownTelegram" type="text" placeholder="например, gazel_msk" autocomplete="off">
+          </div>
+        </div>
+        <div class="field">
+          <label for="ownMax">Ссылка на профиль MAX</label>
+          <div class="control">
+            <svg class="control__icon" aria-hidden="true"><use href="#i-link"/></svg>
+            <input id="ownMax" type="text" placeholder="https://max.ru/u/…" autocomplete="off">
+          </div>
+        </div>
+        <div class="field">
+          <label for="ownPhone">Телефон</label>
+          <div class="control">
+            <svg class="control__icon" aria-hidden="true"><use href="#i-phone"/></svg>
+            <input id="ownPhone" type="tel" placeholder="+7 999 000-00-00" autocomplete="off">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin__foot">
+      <p class="admin__demo">Демо: изменения сохраняются в этом браузере и сразу видны на клиентской странице здесь же. В рабочей версии цены и статусы хранятся в Google Таблице и обновляются у всех клиентов.</p>
+      <button type="button" class="btn btn--ghost" id="ownerReset">Сбросить изменения</button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
