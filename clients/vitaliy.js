@@ -11,8 +11,10 @@ Object.assign(window.SITE_CONFIG, {
   sinceYear: null,
   rating: "5,0",
   reviewsCount: 36,
-  reviewsUrl: "https://www.avito.ru/moskva/predlozheniya_uslug/gruzoperevozki_gazel_6metrov_1670562747",
+  reviewsUrl: "",           // ← ссылка на его объявление на Авито
   areas: "Москва, Королёв, Мытищи, Долгопрудный, Балашиха, Пушкино, Реутов",
+  location: "Москва, Ярославское шоссе · м. Бабушкинская",
+  sellerNote: "Отвечает на сообщения около 30 минут",
   noindex: true,
 
   heroPhoto: "img/vitaliy-bort.jpg",
