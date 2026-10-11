@@ -59,6 +59,7 @@ Object.assign(window.SITE_CONFIG, {
       id: "bort",
       title: "Газель бортовая, тент",
       specs: "кузов 6 м · 19 м³ · до 2 т · высота 2,8 м",
+      desc: "Стройматериалы, металлопрокат с базы, оборудование. Боковая и верхняя загрузка",
       price: 1200,          // ← уточнить
       available: true,
       photo: "img/vitaliy-bort.jpg",

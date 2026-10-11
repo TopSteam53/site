@@ -60,6 +60,7 @@ Object.assign(window.SITE_CONFIG, {
       id: "next62",
       title: "Газель Next 6,2 м",
       specs: "еврофургон · 28 м³ · 12 европаллет · до 2,2 т",
+      desc: "Переезды, мебель, паллеты и длинномер до 6 м. Верхняя, задняя и боковая загрузка",
       price: 2000,          // ← уточнить
       available: true,
       photo: "img/sergey-1.jpg",
