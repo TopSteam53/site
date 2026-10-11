@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Грузоперевозки на Газели</title>
+  <meta name="description" content="Расчёт стоимости переезда и заказ Газели с грузчиками онлайн">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e8590c'/%3E%3Cpath d='M12 22h24v18H12zM36 28h9l7 7v5H36z' fill='white'/%3E%3Ccircle cx='21' cy='42' r='5' fill='white' stroke='%23e8590c' stroke-width='3'/%3E%3Ccircle cx='45' cy='42' r='5' fill='white' stroke='%23e8590c' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top__in">
+      <div class="brand">
+        <span class="brand__logo" aria-hidden="true"></span>
+        <span class="brand__name" data-bind="name"></span>
+      </div>
+      <a class="top__phone" data-bind-href="tel" data-bind="phone"></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <p class="hero__city" data-bind="cityLine"></p>
+        <h1 class="hero__title">Переезд без лишних звонков: цена&nbsp;сразу, заявка за&nbsp;минуту</h1>
+        <p class="hero__sub" data-bind="tagline"></p>
+        <ul class="badges" id="badges"></ul>
+        <a href="#order" class="btn btn--primary btn--lg">Рассчитать стоимость</a>
+      </div>
+    </section>
+
+    <section class="section" id="fleet">
+      <div class="wrap">
+        <h2 class="section__title">Машины</h2>
+        <div class="fleet" id="fleetList"></div>
+      </div>
+    </section>
+
+    <section class="section section--alt">
+      <div class="wrap">
+        <h2 class="section__title">Как заказать</h2>
+        <ol class="steps">
+          <li><b>Выберите машину и время</b><span>Калькулятор сразу покажет примерную стоимость.</span></li>
+          <li><b>Отправьте заявку</b><span data-bind="sendHint"></span></li>
+          <li><b>Получите подтверждение</b><span data-bind="confirmHint"></span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" id="order">
+      <div class="wrap">
+        <h2 class="section__title">Расчёт и заявка</h2>
+        <form class="order" id="orderForm" novalidate>
+          <fieldset class="card">
+            <legend>Машина</legend>
+            <div class="choice" id="vehicleChoice"></div>
+          </fieldset>
+
+          <fieldset class="card">
+            <legend>Адреса</legend>
+            <label class="field">
+              <span>Откуда <i>*</i></span>
+              <input name="from" type="text" placeholder="Улица, дом" autocomplete="street-address" required>
+            </label>
+            <div class="row">
+              <label class="field">
+                <span>Этаж</span>
+                <input name="floorFrom" type="number" inputmode="numeric" min="1" max="40" value="1">
+              </label>
+              <label class="check check--inline">
+                <input name="liftFrom" type="checkbox" checked><span>Есть грузовой лифт</span>
+              </label>
+            </div>
+            <label class="field">
+              <span>Куда <i>*</i></span>
+              <input name="to" type="text" placeholder="Улица, дом" required>
+            </label>
+            <div class="row">
+              <label class="field">
+                <span>Этаж</span>
+                <input name="floorTo" type="number" inputmode="numeric" min="1" max="40" value="1">
+              </label>
+              <label class="check check--inline">
+                <input name="liftTo" type="checkbox" checked><span>Есть грузовой лифт</span>
+              </label>
+            </div>
+            <label class="field">
+              <span data-bind="outsideLabel"></span>
+              <input name="outsideKm" type="number" inputmode="numeric" min="0" max="500" value="0">
+              <small>Если оба адреса в черте города — оставьте 0</small>
+            </label>
+          </fieldset>
+
+          <fieldset class="card">
+            <legend>Время и грузчики</legend>
+            <div class="row">
+              <label class="field">
+                <span>Дата <i>*</i></span>
+                <input name="date" type="date" required>
+              </label>
+              <label class="field">
+                <span>Время подачи</span>
+                <input name="time" type="time" value="10:00" step="1800">
+              </label>
+            </div>
+            <div class="stepper" data-stepper="hours">
+              <span class="stepper__label">Часов работы</span>
+              <button type="button" class="stepper__btn" data-step="-1" aria-label="Меньше часов">−</button>
+              <output class="stepper__val" id="hoursVal"></output>
+              <button type="button" class="stepper__btn" data-step="1" aria-label="Больше часов">+</button>
+            </div>
+            <p class="hint" id="hoursHint"></p>
+            <div class="stepper" data-stepper="movers">
+              <span class="stepper__label">Грузчиков</span>
+              <button type="button" class="stepper__btn" data-step="-1" aria-label="Меньше грузчиков">−</button>
+              <output class="stepper__val" id="moversVal"></output>
+              <button type="button" class="stepper__btn" data-step="1" aria-label="Больше грузчиков">+</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="card" id="extrasCard">
+            <legend>Дополнительно</legend>
+            <div id="extrasList"></div>
+            <label class="field">
+              <span>Что перевозим</span>
+              <textarea name="comment" rows="3" placeholder="Например: диван, холодильник, 15 коробок, стиральная машина"></textarea>
+            </label>
+          </fieldset>
+
+          <fieldset class="card">
+            <legend>Контакты</legend>
+            <div class="row">
+              <label class="field">
+                <span>Имя</span>
+                <input name="clientName" type="text" autocomplete="given-name" placeholder="Как к вам обращаться">
+              </label>
+              <label class="field">
+                <span>Телефон <i>*</i></span>
+                <input name="clientPhone" type="tel" autocomplete="tel" placeholder="+7" required>
+              </label>
+            </div>
+          </fieldset>
+
+          <aside class="card estimate" id="estimate" aria-live="polite">
+            <h3 class="estimate__title">Предварительная стоимость</h3>
+            <ul class="estimate__lines" id="estimateLines"></ul>
+            <p class="estimate__total"><span>Примерно</span><strong id="estimateTotal"></strong></p>
+            <p class="estimate__note">Это ориентир, а не итоговая цена: оплата — по фактическому времени работы. Точную сумму подтвердит исполнитель.</p>
+            <p class="form-error" id="formError" role="alert" hidden></p>
+            <div class="send" id="sendButtons"></div>
+            <button type="button" class="btn btn--ghost" id="copyBtn">Скопировать заявку</button>
+          </aside>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap">
+      <p><b data-bind="name"></b> · <span data-bind="city"></span></p>
+      <p><a data-bind-href="tel" data-bind="phone"></a></p>
+    </div>
+  </footer>
+
+  <div class="bar" id="bar">
+    <div class="bar__sum"><small>Примерно</small><strong id="barTotal"></strong></div>
+    <a href="#estimate" class="btn btn--primary">Оформить</a>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
